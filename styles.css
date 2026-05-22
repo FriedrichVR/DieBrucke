@@ -2177,6 +2177,14 @@ textarea:focus-visible {
 }
 
 @media (max-width: 768px) {
+    .hero-visual {
+        order: 2;
+    }
+
+    .hero-content {
+        order: 1;
+    }
+
     .nav-container {
         padding-top: 12px;
         padding-bottom: 12px;
