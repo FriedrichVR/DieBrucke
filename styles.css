@@ -1917,11 +1917,17 @@ textarea:focus-visible {
     }
 
     .showcase-carousel {
-        height: auto;
+        height: 520px;
+    }
+
+    .slide-content {
+        grid-template-columns: 1fr;
+        grid-template-rows: 230px 1fr;
+        height: 100%;
     }
 
     .slide-image {
-        height: 220px;
+        height: 100%;
     }
 
     .slide-text {
@@ -1935,11 +1941,17 @@ textarea:focus-visible {
 
     .carousel-controls {
         margin-top: 14px;
+        justify-content: center;
+        gap: 16px;
     }
 
     .carousel-btn {
         width: 42px;
         height: 42px;
+    }
+
+    .carousel-dots {
+        order: 0;
     }
 
     .about-tag {
@@ -2003,6 +2015,20 @@ textarea:focus-visible {
 
     .modal-header,
     .modal-body {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 430px) {
+    .showcase-carousel {
+        height: 500px;
+    }
+
+    .slide-content {
+        grid-template-rows: 210px 1fr;
+    }
+
+    .slide-text {
         padding: 16px;
     }
 }
