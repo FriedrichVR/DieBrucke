@@ -80,14 +80,29 @@ function initNavigationDrawer() {
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const closeDrawerBtn = document.getElementById('close-drawer-btn');
     const mobileDrawer = document.getElementById('mobile-drawer');
+    const mobileDrawerBackdrop = document.getElementById('mobile-drawer-backdrop');
 
     function openDrawer() {
+        if (!mobileDrawer) return;
         mobileDrawer.classList.add('open');
+        if (mobileDrawerBackdrop) {
+            mobileDrawerBackdrop.classList.add('open');
+        }
+        if (mobileMenuBtn) {
+            mobileMenuBtn.setAttribute('aria-expanded', 'true');
+        }
         document.body.classList.add('drawer-open');
     }
 
     function closeDrawer() {
+        if (!mobileDrawer) return;
         mobileDrawer.classList.remove('open');
+        if (mobileDrawerBackdrop) {
+            mobileDrawerBackdrop.classList.remove('open');
+        }
+        if (mobileMenuBtn) {
+            mobileMenuBtn.setAttribute('aria-expanded', 'false');
+        }
         document.body.classList.remove('drawer-open');
     }
 
@@ -97,6 +112,10 @@ function initNavigationDrawer() {
 
     if (closeDrawerBtn && mobileDrawer) {
         closeDrawerBtn.addEventListener('click', closeDrawer);
+    }
+
+    if (mobileDrawerBackdrop) {
+        mobileDrawerBackdrop.addEventListener('click', closeDrawer);
     }
 
     if (mobileDrawer) {
@@ -118,9 +137,17 @@ function initNavigationDrawer() {
 
 function toggleDrawer() {
     const mobileDrawer = document.getElementById('mobile-drawer');
+    const mobileDrawerBackdrop = document.getElementById('mobile-drawer-backdrop');
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     if (mobileDrawer) {
         mobileDrawer.classList.remove('open');
         document.body.classList.remove('drawer-open');
+    }
+    if (mobileDrawerBackdrop) {
+        mobileDrawerBackdrop.classList.remove('open');
+    }
+    if (mobileMenuBtn) {
+        mobileMenuBtn.setAttribute('aria-expanded', 'false');
     }
 }
 
