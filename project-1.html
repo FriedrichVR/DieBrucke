@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Proyecto 1 | Die Brucke</title>
+    <meta name="description" content="Especificaciones del recurso digital Proyecto 1 y opción de compra.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .product-detail {
+            position: relative;
+            padding: 120px 0 80px;
+            overflow: hidden;
+        }
+
+        .product-detail::before,
+        .product-detail::after {
+            content: '';
+            position: absolute;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .product-detail::before {
+            width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(196, 164, 124, 0.25), transparent 68%);
+            top: 10px;
+            left: -140px;
+        }
+
+        .product-detail::after {
+            width: 520px;
+            height: 520px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(23, 42, 57, 0.14), transparent 70%);
+            bottom: -220px;
+            right: -180px;
+        }
+
+        .product-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 22px;
+        }
+
+        .product-breadcrumb a:hover {
+            color: var(--text);
+        }
+
+        .product-layout {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .product-media,
+        .product-info {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), var(--surface));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .product-media {
+            position: relative;
+        }
+
+        .media-badge {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            z-index: 2;
+            background: rgba(23, 42, 57, 0.85);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-full);
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            padding: 7px 12px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .product-media img {
+            width: 100%;
+            height: 100%;
+            max-height: 620px;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 28px;
+            position: sticky;
+            top: 92px;
+        }
+
+        .product-tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--tertiary);
+            margin-bottom: 6px;
+        }
+
+        .product-topline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .availability {
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 5px 10px;
+            border-radius: var(--radius-full);
+            background: var(--surface-low);
+        }
+
+        .product-title {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .product-lead {
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            font-size: 1.02rem;
+        }
+
+        .price-row {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .product-price {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+
+        .price-note {
+            color: var(--tertiary);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .quick-benefits {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .quick-benefits span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            background: var(--surface-low);
+            padding: 5px 10px;
+            border-radius: var(--radius-full);
+        }
+
+        .product-specs {
+            list-style: none;
+            display: grid;
+            gap: 10px;
+            margin: 20px 0 28px;
+        }
+
+        .product-specs li {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 16px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            color: var(--text-muted);
+        }
+
+        .spec-label {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .spec-value {
+            text-align: right;
+        }
+
+        .product-guarantees {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: -8px;
+        }
+
+        .guarantee-item {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface-low);
+            padding: 10px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        body.dark-mode .product-media,
+        body.dark-mode .product-info {
+            background: linear-gradient(180deg, rgba(31, 44, 55, 0.95), var(--surface));
+        }
+
+        body.dark-mode .guarantee-item,
+        body.dark-mode .quick-benefits span,
+        body.dark-mode .availability {
+            background: rgba(21, 30, 37, 0.7);
+        }
+
+        @media (max-width: 992px) {
+            .product-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .product-media img {
+                max-height: 420px;
+            }
+
+            .product-info {
+                position: static;
+            }
+
+            .product-guarantees {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .product-detail {
+                padding: 92px 0 56px;
+            }
+
+            .product-breadcrumb {
+                font-size: 0.78rem;
+                gap: 6px;
+                margin-bottom: 14px;
+            }
+
+            .product-title {
+                font-size: 1.75rem;
+            }
+
+            .product-info {
+                padding: 18px;
+            }
+
+            .product-topline {
+                flex-wrap: wrap;
+            }
+
+            .price-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2px;
+            }
+
+            .media-badge {
+                top: 10px;
+                left: 10px;
+                font-size: 0.66rem;
+                padding: 6px 10px;
+            }
+
+            .product-specs li {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .spec-value {
+                text-align: left;
+            }
+
+            .product-actions {
+                flex-direction: column;
+            }
+
+            .product-actions .btn-primary,
+            .product-actions .btn-secondary {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <main class="product-detail">
+        <div class="grid-container">
+            <nav class="product-breadcrumb" aria-label="Navegación de producto">
+                <a href="index.html">Inicio</a>
+                <span>/</span>
+                <a href="index.html#catalogo">Catálogo</a>
+                <span>/</span>
+                <span>Proyecto 1</span>
+            </nav>
+
+            <div class="product-layout">
+            <article class="product-media">
+                <span class="media-badge">Edición Curada</span>
+                <img src="images/pc.jpg" alt="Proyecto 1 - Vista previa del recurso digital">
+            </article>
+
+            <article class="product-info">
+                <div class="product-topline">
+                    <span class="product-tag">Assets 2D</span>
+                    <span class="availability">Disponible</span>
+                </div>
+                <h1 class="product-title">Proyecto 1</h1>
+                <p class="product-lead">Pack digital orientado a diseño gráfico y presentaciones, con recursos listos para uso inmediato en piezas visuales y láminas.</p>
+
+                <div class="price-row">
+                    <p class="product-price">$3.500 ARS</p>
+                    <span class="price-note">Pago unico</span>
+                </div>
+
+                <div class="quick-benefits">
+                    <span>Descarga inmediata</span>
+                    <span>Uso comercial</span>
+                    <span>Actualización incluida</span>
+                </div>
+
+                <ul class="product-specs">
+                    <li><span class="spec-label">Formato</span><span class="spec-value">PNG, JPG, SVG</span></li>
+                    <li><span class="spec-label">Resolución</span><span class="spec-value">Hasta 4K</span></li>
+                    <li><span class="spec-label">Entrega</span><span class="spec-value">Descarga digital inmediata</span></li>
+                    <li><span class="spec-label">Licencia</span><span class="spec-value">Uso comercial incluido</span></li>
+                    <li><span class="spec-label">Compatibilidad</span><span class="spec-value">Adobe, Figma, Canva y similares</span></li>
+                </ul>
+
+                <div class="product-guarantees" aria-label="Beneficios adicionales">
+                    <div class="guarantee-item">Archivos ordenados por capas</div>
+                    <div class="guarantee-item">Calidad optimizada para presentaciones</div>
+                    <div class="guarantee-item">Soporte por contacto directo</div>
+                </div>
+
+                <div class="product-actions">
+                    <a class="btn-primary" href="index.html#contact-form-section">Comprar Ahora</a>
+                    <a class="btn-secondary" href="index.html#catalogo">Volver al Catálogo</a>
+                </div>
+            </article>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

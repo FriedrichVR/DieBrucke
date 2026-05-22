@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Historia de Magdalena | Die Brucke</title>
+    <meta name="description" content="Conocé la historia de Magdalena, creadora de Die Brucke: su camino, procesos y filosofía de diseño.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .story-page {
+            padding: 112px 0 80px;
+        }
+
+        body.dark-mode .story-hero-content,
+        body.dark-mode .story-hero-media,
+        body.dark-mode .story-section {
+            background: linear-gradient(180deg, rgba(31, 44, 55, 0.95), var(--surface));
+        }
+
+        .story-hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            align-items: stretch;
+            margin-bottom: 56px;
+        }
+
+        .story-hero-content,
+        .story-hero-media {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .story-hero-content {
+            padding: 34px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .story-hero-content h1 {
+            font-size: 2.4rem;
+            margin-bottom: 14px;
+        }
+
+        .story-hero-content p {
+            color: var(--text-muted);
+            margin-bottom: 14px;
+        }
+
+        .story-hero-media img {
+            width: 100%;
+            height: 100%;
+            min-height: 420px;
+            object-fit: cover;
+        }
+
+        .story-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 34px;
+            margin-bottom: 26px;
+        }
+
+        .story-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 18px;
+        }
+
+        .timeline {
+            display: grid;
+            gap: 18px;
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 18px;
+            align-items: start;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .timeline-year {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.05em;
+        }
+
+        .timeline-copy p {
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .story-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 18px;
+        }
+
+        .story-gallery figure {
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--surface-low);
+        }
+
+        .story-gallery img {
+            width: 100%;
+            height: 230px;
+            object-fit: cover;
+        }
+
+        .story-gallery figcaption {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            padding: 10px;
+        }
+
+        .story-values {
+            list-style: none;
+            display: grid;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .story-values li {
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface-low);
+        }
+
+        .story-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 992px) {
+            .story-hero {
+                grid-template-columns: 1fr;
+            }
+
+            .story-gallery {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .story-page {
+                padding-top: 90px;
+                padding-bottom: 56px;
+            }
+
+            .story-hero-content,
+            .story-section {
+                padding: 22px;
+            }
+
+            .story-hero-media img {
+                min-height: 280px;
+            }
+
+            .story-hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .story-section h2 {
+                font-size: 1.5rem;
+            }
+
+            .timeline-item {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+
+            .timeline-year {
+                font-size: 0.86rem;
+            }
+
+            .story-gallery {
+                grid-template-columns: 1fr;
+            }
+
+            .story-gallery img {
+                height: 210px;
+            }
+
+            .story-actions {
+                flex-direction: column;
+            }
+
+            .story-actions .btn-primary,
+            .story-actions .btn-secondary {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <main class="story-page">
+        <section class="grid-container story-hero">
+            <article class="story-hero-content">
+                <span class="badge">CONOCE A LA CREADORA</span>
+                <h1>La historia de Magdalena</h1>
+                <p>Diseñadora y arquitecta enfocada en unir precisión técnica con sensibilidad visual. Esta página resume su recorrido personal, la evolución de su método y la visión detrás de Die Brucke.</p>
+                <p>Su trabajo nace entre planos, fotografía y pruebas de materiales reales para que cada recurso digital tenga utilidad práctica y una estética cuidada.</p>
+                <div class="story-actions">
+                    <a class="btn-primary" href="index.html#contact-form-section">Contactar a Magdalena</a>
+                    <a class="btn-secondary" href="index.html">Volver al sitio</a>
+                </div>
+            </article>
+            <article class="story-hero-media">
+                <img src="images/magdalena.jpg" alt="Retrato de Magdalena, creadora de Die Brucke">
+            </article>
+        </section>
+
+        <section class="grid-container story-section">
+            <h2>Trayectoria</h2>
+            <div class="timeline">
+                <article class="timeline-item">
+                    <span class="timeline-year">2016</span>
+                    <div class="timeline-copy">
+                        <h3>Primeros proyectos universitarios</h3>
+                        <p>Comienza a desarrollar bibliotecas personales de bloques y texturas para acelerar entregas académicas, priorizando orden de capas y claridad visual.</p>
+                    </div>
+                </article>
+                <article class="timeline-item">
+                    <span class="timeline-year">2019</span>
+                    <div class="timeline-copy">
+                        <h3>Del estudio al formato digital</h3>
+                        <p>Tras trabajar en encargos reales, transforma sus recursos internos en paquetes listos para otros diseñadores que buscaban calidad técnica sin perder tiempo.</p>
+                    </div>
+                </article>
+                <article class="timeline-item">
+                    <span class="timeline-year">2022</span>
+                    <div class="timeline-copy">
+                        <h3>Nace Die Brucke</h3>
+                        <p>Lanza la plataforma con foco en assets utilizables desde el primer día: plantillas limpias, nomenclatura consistente y estilo visual coherente.</p>
+                    </div>
+                </article>
+                <article class="timeline-item">
+                    <span class="timeline-year">Hoy</span>
+                    <div class="timeline-copy">
+                        <h3>Comunidad y evolución continua</h3>
+                        <p>Actualiza la librería de forma constante, incorpora feedback de usuarios y comparte procesos para ayudar a profesionales y estudiantes a presentar mejor.</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="grid-container story-section">
+            <h2>Vida y proceso creativo</h2>
+            <p>Magdalena trabaja combinando investigación visual, referencias de arquitectura moderna y pruebas en software de modelado. Su filosofía es simple: un buen recurso digital no solo debe verse bien, también debe resolver un problema real de producción.</p>
+            <div class="story-gallery">
+                <figure>
+                    <img src="images/d1.jpg" alt="Mesa de trabajo con planos y referencias">
+                    <figcaption>Sesiones de ideación y selección de referencias.</figcaption>
+                </figure>
+                <figure>
+                    <img src="images/d2.jpg" alt="Detalle de composición visual y materiales">
+                    <figcaption>Curaduría de materiales y limpieza de estilo.</figcaption>
+                </figure>
+                <figure>
+                    <img src="images/d3.jpg" alt="Visual digital del proceso de producción">
+                    <figcaption>Producción final de recursos para publicación.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section class="grid-container story-section">
+            <h2>Valores que guían la marca</h2>
+            <ul class="story-values">
+                <li><strong>Calidad antes que volumen:</strong> cada pack se revisa para asegurar consistencia visual y estructura técnica.</li>
+                <li><strong>Practicidad real:</strong> archivos preparados para usarse rápido en presentaciones y proyectos.</li>
+                <li><strong>Estética con criterio:</strong> recursos pensados para comunicar mejor, no solo decorar.</li>
+                <li><strong>Aprendizaje continuo:</strong> la librería evoluciona con tendencias, tecnología y feedback de la comunidad.</li>
+            </ul>
+        </section>
+    </main>
+</body>
+</html>
