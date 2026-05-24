@@ -75,7 +75,8 @@
 
         .product-media {
             position: relative;
-            height: clamp(320px, 50vw, 620px); /* Evita que el contenedor colapse con el carrusel absoluto */
+            align-self: stretch;
+            height: 100%;
             background: #f5f5f5; /* Fondo gris claro según la referencia */
         }
 
@@ -363,9 +364,10 @@
                 <h1 class="product-title">Producto 1</h1>
                 <p class="product-lead">Pack digital orientado a diseño gráfico y presentaciones, con recursos listos para uso inmediato en piezas visuales y láminas.</p>
 
+                <!-- Valor del producto -->
                 <div class="price-row">
-                    <p class="product-price">$3.500 ARS</p>
-                    <span class="price-note">Pago unico</span>
+                    <p class="product-price">Gratuito</p>
+                    <span class="price-note">Ultimos 10</span>
                 </div>
 
                 <div class="quick-benefits">
@@ -389,7 +391,7 @@
                 </div>
 
                 <div class="product-actions">
-                    <a class="btn-primary" href="index.html#contact-form-section">Comprar Ahora</a>
+                    <a class="btn-primary" href="index.html#contact-form-section">Descargar</a>
                     <a class="btn-secondary" href="index.html#catalogo">Volver al Catálogo</a>
                 </div>
             </article>

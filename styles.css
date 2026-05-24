@@ -95,6 +95,7 @@ body.dark-mode .main-footer {
 html {
     scroll-behavior: smooth;
     font-size: 16px;
+    overflow-x: hidden;
 }
 
 body {
@@ -563,6 +564,8 @@ body.dark-mode .main-header {
     border-color: var(--accent);
     transform: translateY(-4px);
 }
+
+
 
 /* Son mis notas personales para el desarrollo de css */
 
