@@ -1,4 +1,4 @@
-// Sanctuary Studio Interactive Functionality
+// Die Brucke Atelier Interactive Functionality
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize Lucide Icons
@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Carousel
     initCarousel();
+
+    // Initialize Product Carousels
+    initProductCarousels();
 });
 
 /* ==========================================================================
@@ -504,4 +507,64 @@ function initScrollAnimations() {
         // Fallback for older browsers
         animatedElements.forEach(el => el.classList.add('animated'));
     }
+}
+
+/* ==========================================================================
+   8. Product Carousels in Catalog
+   ========================================================================== */
+function initProductCarousels() {
+    const carousels = document.querySelectorAll('.product-carousel');
+    
+    carousels.forEach((carousel) => {
+        const slides = carousel.querySelectorAll('.product-carousel-slides img');
+        const prevBtn = carousel.querySelector('.prod-carousel-btn.prev');
+        const nextBtn = carousel.querySelector('.prod-carousel-btn.next');
+        const dots = carousel.querySelectorAll('.prod-carousel-dots .prod-dot');
+        
+        if (slides.length === 0) return;
+        
+        let currentIdx = 0;
+        
+        function showSlide(idx) {
+            if (idx < 0) {
+                currentIdx = slides.length - 1;
+            } else if (idx >= slides.length) {
+                currentIdx = 0;
+            } else {
+                currentIdx = idx;
+            }
+            
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === currentIdx);
+            });
+            
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentIdx);
+            });
+        }
+        
+        if (prevBtn) {
+            prevBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                showSlide(currentIdx - 1);
+            });
+        }
+        
+        if (nextBtn) {
+            nextBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                showSlide(currentIdx + 1);
+            });
+        }
+        
+        dots.forEach((dot, dotIdx) => {
+            dot.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                showSlide(dotIdx);
+            });
+        });
+    });
 }

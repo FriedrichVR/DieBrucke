@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Proyecto 1 | Die Brucke</title>
+    <title>Producto 1 | Die Brucke</title>
     <meta name="description" content="Especificaciones del recurso digital Proyecto 1 y opción de compra.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         .product-detail {
             position: relative;
@@ -73,6 +75,8 @@
 
         .product-media {
             position: relative;
+            height: clamp(320px, 50vw, 620px); /* Evita que el contenedor colapse con el carrusel absoluto */
+            background: #f5f5f5; /* Fondo gris claro según la referencia */
         }
 
         .media-badge {
@@ -95,7 +99,7 @@
             width: 100%;
             height: 100%;
             max-height: 620px;
-            object-fit: cover;
+            object-fit: contain; /* Adaptar la imagen al contenedor sin recortar */
         }
 
         .product-info {
@@ -247,8 +251,8 @@
                 grid-template-columns: 1fr;
             }
 
-            .product-media img {
-                max-height: 420px;
+            .product-media {
+                height: 420px;
             }
 
             .product-info {
@@ -324,13 +328,31 @@
                 <span>/</span>
                 <a href="index.html#catalogo">Catálogo</a>
                 <span>/</span>
-                <span>Proyecto 1</span>
+                <span>Producto 1</span>
             </nav>
 
             <div class="product-layout">
-            <article class="product-media">
-                <span class="media-badge">Edición Curada</span>
-                <img src="images/PC.jpg" alt="Proyecto 1 - Vista previa del recurso digital">
+            <article class="product-media">            
+                <div class="product-carousel">
+                    <div class="product-carousel-slides">
+                        <img src="images/card1/01.jpeg" alt="Producto 1 - Vista 1" class="active">
+                        <img src="images/card1/02.jpeg" alt="Producto 1 - Vista 2">
+                        <img src="images/card1/03.jpeg" alt="Producto 1 - Vista 3">
+                        <img src="images/card1/04.jpeg" alt="Producto 1 - Vista 4">
+                    </div>
+                    <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
+                        <i data-lucide="chevron-left"></i>
+                    </button>
+                    <button class="prod-carousel-btn next" aria-label="Siguiente imagen">
+                        <i data-lucide="chevron-right"></i>
+                    </button>
+                    <div class="prod-carousel-dots">
+                        <span class="prod-dot active"></span>
+                        <span class="prod-dot"></span>
+                        <span class="prod-dot"></span>
+                        <span class="prod-dot"></span>
+                    </div>
+                </div>
             </article>
 
             <article class="product-info">
@@ -338,7 +360,7 @@
                     <span class="product-tag">Assets 2D</span>
                     <span class="availability">Disponible</span>
                 </div>
-                <h1 class="product-title">Proyecto 1</h1>
+                <h1 class="product-title">Producto 1</h1>
                 <p class="product-lead">Pack digital orientado a diseño gráfico y presentaciones, con recursos listos para uso inmediato en piezas visuales y láminas.</p>
 
                 <div class="price-row">
@@ -374,5 +396,7 @@
             </div>
         </div>
     </main>
+    <!-- JS Scripts -->
+    <script src="script.js"></script>
 </body>
 </html>

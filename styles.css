@@ -564,12 +564,14 @@ body.dark-mode .main-header {
     transform: translateY(-4px);
 }
 
+/* Son mis notas personales para el desarrollo de css */
+
 .blueprint-preview {
     border-radius: var(--radius-md);
     overflow: hidden;
-    height: 400px;
+    height: 570px; /* Ajusta este valor en píxeles para cambiar el alto de la foto del hero */
     background-color: var(--surface-low);
-    margin-bottom: 16px;
+    margin-bottom: 0; /* Cambiado a 0 porque se borró el texto de abajo */
 }
 
 .blueprint-preview img {
@@ -837,7 +839,7 @@ body.dark-mode .main-header {
 .card-image {
     position: relative;
     height: 240px;
-    background-color: var(--surface-low);
+    background-color: #f5f5f5 !important; /* Fondo gris claro forzado */
     overflow: hidden;
 }
 
@@ -849,11 +851,7 @@ body.dark-mode .main-header {
 }
 
 .card-image::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(23, 42, 57, 0.24), transparent 55%);
-    pointer-events: none;
+    display: none; /* Desactivado para quitar el degradado inferior y dejar el fondo gris claro limpio */
 }
 
 .catalog-card:hover .card-image img {
@@ -871,6 +869,130 @@ body.dark-mode .main-header {
     padding: 4px 10px;
     border-radius: var(--radius-sm);
     backdrop-filter: blur(4px);
+    z-index: 15; /* Asegurar que el badge quede por encima del carrusel y botones */
+}
+
+/* Carrusel de Productos en Catálogo */
+.product-carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.product-carousel-slides {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.product-carousel-slides img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain !important; /* Adaptar la imagen sin recortar forzado */
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.6s ease;
+    z-index: 1;
+}
+
+.product-carousel-slides img.active {
+    opacity: 1;
+    z-index: 2;
+}
+
+.product-carousel:hover .product-carousel-slides img.active {
+    transform: scale(1.04);
+}
+
+.prod-carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background-color: rgba(251, 249, 250, 0.95);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s ease, background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 10px rgba(23, 42, 57, 0.15);
+    border: none;
+    outline: none;
+}
+
+.catalog-card:hover .prod-carousel-btn,
+.product-media:hover .prod-carousel-btn {
+    opacity: 1;
+}
+
+/* Mostrar flechas con baja opacidad por defecto en el detalle del producto */
+.product-media .prod-carousel-btn {
+    opacity: 0.5;
+}
+
+.prod-carousel-btn:hover {
+    background-color: var(--primary);
+    color: #ffffff;
+    transform: translateY(-50%) scale(1.08);
+}
+
+.prod-carousel-btn.prev {
+    left: 10px;
+}
+
+.prod-carousel-btn.next {
+    right: 10px;
+}
+
+.prod-carousel-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.prod-carousel-dots {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    z-index: 10;
+    background-color: rgba(23, 42, 57, 0.45);
+    padding: 4px 8px;
+    border-radius: var(--radius-full);
+    backdrop-filter: blur(4px);
+    transition: opacity 0.3s ease;
+    pointer-events: auto;
+}
+
+.prod-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: background-color 0.3s ease, width 0.3s ease;
+}
+
+.prod-dot.active {
+    background-color: #ffffff;
+    width: 10px;
+    border-radius: 3px;
+}
+
+/* Soporte para pantallas táctiles (mostrar botones por defecto) */
+@media (hover: none) {
+    .prod-carousel-btn {
+        opacity: 0.8;
+    }
 }
 
 .card-body {
@@ -1772,9 +1894,7 @@ textarea:focus-visible {
     flex-wrap: wrap;
 }
 
-.blueprint-preview {
-    height: clamp(260px, 36vw, 400px);
-}
+
 
 .catalog-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
