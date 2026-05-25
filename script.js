@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Product Carousels
     initProductCarousels();
+
+    // Initialize Download Lead Modal
+    initDownloadModal();
 });
 
 /* ==========================================================================
@@ -567,4 +570,202 @@ function initProductCarousels() {
             });
         });
     });
+}
+
+/* ==========================================================================
+   9. Download Lead Modal & Export System
+   ========================================================================== */
+function initDownloadModal() {
+    const downloadBtns = document.querySelectorAll('.product-actions .btn-primary');
+    if (downloadBtns.length === 0) return;
+
+    // Inject modal HTML if not already in document
+    if (!document.getElementById('download-modal')) {
+        const modalHTML = `
+            <div class="modal-overlay" id="download-modal" style="display: none;">
+                <div class="modal-card">
+                    <div class="modal-header">
+                        <h3>Descarga Gratuita</h3>
+                        <button class="close-modal" id="close-download-modal" aria-label="Cerrar modal">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="download-modal-lead" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">
+                            Ingresá tu nombre y correo electrónico para iniciar la descarga de <strong id="download-modal-prod-name" style="color: var(--accent);"></strong>.
+                        </p>
+                        <form id="download-lead-form">
+                            <div class="form-group">
+                                <label for="download-name">Nombre Completo</label>
+                                <input type="text" id="download-name" required placeholder="Ej: Juan Pérez">
+                            </div>
+                            <div class="form-group">
+                                <label for="download-email">Correo Electrónico</label>
+                                <input type="email" id="download-email" required placeholder="tuemail@correo.com">
+                                <span class="help-text">El archivo se descargará inmediatamente al confirmar.</span>
+                            </div>
+                            <button type="submit" class="btn-primary w-full" style="margin-top: 10px;">Confirmar y Descargar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        lucide.createIcons();
+    }
+
+    const modal = document.getElementById('download-modal');
+    const closeBtn = document.getElementById('close-download-modal');
+    const form = document.getElementById('download-lead-form');
+    const modalProdName = document.getElementById('download-modal-prod-name');
+
+    let activeDownloadUrl = '';
+    let activeDownloadFilename = '';
+    let activeProductName = '';
+
+    function openModal(prodName, url, filename) {
+        activeProductName = prodName;
+        activeDownloadUrl = url;
+        activeDownloadFilename = filename;
+
+        modalProdName.textContent = prodName;
+        modal.style.display = 'flex';
+        modal.offsetHeight; // Reflow
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+        setTimeout(() => {
+            if (!modal.classList.contains('open')) {
+                modal.style.display = 'none';
+            }
+        }, 300);
+        form.reset();
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    downloadBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const href = btn.getAttribute('href');
+            if (href && (href.endsWith('.pdf') || btn.hasAttribute('download'))) {
+                e.preventDefault();
+                const prodName = btn.getAttribute('data-product-name') || document.title.split('|')[0].trim();
+                const filename = btn.getAttribute('download') || 'recurso.pdf';
+                openModal(prodName, href, filename);
+            }
+        });
+    });
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('download-name').value.trim();
+        const email = document.getElementById('download-email').value.trim();
+
+        if (!name || !email) return;
+
+        // 1. Save data to LocalStorage
+        const lead = {
+            name: name,
+            email: email,
+            product: activeProductName,
+            timestamp: new Date().toISOString()
+        };
+
+        let existingLeads = [];
+        try {
+            existingLeads = JSON.parse(localStorage.getItem('die_brucke_leads')) || [];
+        } catch (err) {
+            existingLeads = [];
+        }
+        existingLeads.push(lead);
+        localStorage.setItem('die_brucke_leads', JSON.stringify(existingLeads));
+
+        // 2. Generate and download registration txt file
+        const regContent = `--- REGISTRO DE DESCARGA ---
+Fecha: ${new Date().toLocaleString()}
+Producto: ${activeProductName}
+Nombre: ${name}
+Email: ${email}
+----------------------------`;
+        
+        const blob = new Blob([regContent], { type: 'text/plain;charset=utf-8' });
+        const regUrl = URL.createObjectURL(blob);
+        const regLink = document.createElement('a');
+        const formattedName = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        regLink.href = regUrl;
+        regLink.download = `registro_descarga_${formattedName}.txt`;
+        document.body.appendChild(regLink);
+        regLink.click();
+        document.body.removeChild(regLink);
+        URL.revokeObjectURL(regUrl);
+
+        // 3. Trigger product download
+        const prodLink = document.createElement('a');
+        prodLink.href = activeDownloadUrl;
+        prodLink.download = activeDownloadFilename;
+        document.body.appendChild(prodLink);
+        prodLink.click();
+        document.body.removeChild(prodLink);
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Iniciando descarga...';
+
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            closeModal();
+            alert(`¡Gracias ${name}! La descarga de "${activeProductName}" ha comenzado. Se ha guardado tu registro localmente.`);
+        }, 1000);
+    });
+}
+
+// Administrative CSV Exporter Tool
+if (window.location.search.includes('export-leads=true')) {
+    exportLeadsToCSV();
+}
+
+function exportLeadsToCSV() {
+    let leads = [];
+    try {
+        leads = JSON.parse(localStorage.getItem('die_brucke_leads')) || [];
+    } catch (err) {
+        leads = [];
+    }
+
+    if (leads.length === 0) {
+        alert('No hay registros de descargas acumulados todavía.');
+        return;
+    }
+
+    let csvContent = '\uFEFF'; // UTF-8 BOM
+    csvContent += 'Fecha,Nombre,Email,Producto\n';
+
+    leads.forEach(lead => {
+        const date = new Date(lead.timestamp).toLocaleString();
+        const name = `"${lead.name.replace(/"/g, '""')}"`;
+        const email = `"${lead.email.replace(/"/g, '""')}"`;
+        const product = `"${lead.product.replace(/"/g, '""')}"`;
+        csvContent += `${date},${name},${email},${product}\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'die_brucke_leads.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    alert(`Se exportaron con éxito ${leads.length} registros de descargas a "die_brucke_leads.csv".`);
 }
