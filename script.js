@@ -461,6 +461,37 @@ function handleNewsletterSubmit(event) {
     }, 1000);
 }
 
+/* ==========================================================================
+   n8n Webhook Integration
+   ========================================================================== */
+function sendToN8N(data) {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const webhookUrl = isLocal 
+        ? 'https://n8n.srv1202174.hstgr.cloud/webhook-test/65debfa2-2837-4f6b-8052-093144fcc2c8'
+        : 'https://n8n.srv1202174.hstgr.cloud/webhook/65debfa2-2837-4f6b-8052-093144fcc2c8';
+
+    fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            ...data,
+            submittedAt: new Date().toISOString(),
+            environment: isLocal ? 'test' : 'production',
+            pageUrl: window.location.href
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            console.warn('n8n Webhook response was not ok:', response.statusText);
+        }
+    })
+    .catch(error => {
+        console.error('Error sending data to n8n webhook:', error);
+    });
+}
+
 function handleContactSubmit(event) {
     event.preventDefault();
     const feedbackMsg = document.getElementById('contact-message-feedback');
@@ -471,6 +502,19 @@ function handleContactSubmit(event) {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Enviando solicitud...';
     feedbackMsg.textContent = '';
+
+    const name = document.getElementById('contact-name').value.trim();
+    const email = document.getElementById('contact-email').value.trim();
+    const projectType = document.getElementById('contact-project-type').value;
+    const message = document.getElementById('contact-message').value.trim();
+
+    sendToN8N({
+        name: name,
+        email: email,
+        projectType: projectType,
+        message: message,
+        source: 'contact_form'
+    });
 
     setTimeout(() => {
         feedbackMsg.textContent = '¡Solicitud enviada con éxito! Magdalena revisará tus especificaciones y te contactará en las próximas 24 horas.';
@@ -821,6 +865,16 @@ function initDownloadModal() {
         const email = document.getElementById('download-email').value.trim();
 
         if (!name || !email) return;
+
+        // Send to n8n webhook
+        sendToN8N({
+            name: name,
+            email: email,
+            productName: activeProductName,
+            downloadUrl: activeDownloadUrl,
+            filename: activeDownloadFilename,
+            source: 'download_modal'
+        });
 
         // Trigger product download
         const prodLink = document.createElement('a');
