@@ -583,29 +583,174 @@ function initDownloadModal() {
     if (!document.getElementById('download-modal')) {
         const modalHTML = `
             <div class="modal-overlay" id="download-modal" style="display: none;">
+                <style>
+                    #download-modal .modal-card {
+                        border-top: 4px solid var(--accent);
+                        max-width: 440px;
+                        overflow: visible;
+                    }
+                    .download-modal-brand {
+                        font-family: var(--font-display);
+                        font-size: 0.72rem;
+                        font-weight: 700;
+                        letter-spacing: 0.12em;
+                        color: var(--accent);
+                        text-transform: uppercase;
+                        margin-bottom: 2px;
+                        display: block;
+                    }
+                    .download-input-wrapper {
+                        position: relative;
+                        display: flex;
+                        align-items: center;
+                        width: 100%;
+                    }
+                    .download-input-wrapper input {
+                        padding-left: 44px !important;
+                    }
+                    .download-input-wrapper svg {
+                        position: absolute;
+                        left: 16px;
+                        color: var(--tertiary);
+                        width: 18px;
+                        height: 18px;
+                        pointer-events: none;
+                        transition: var(--transition-smooth);
+                    }
+                    .download-input-wrapper input:focus + svg {
+                        color: var(--accent);
+                    }
+                    .download-modal-footer {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        font-size: 0.72rem;
+                        color: var(--text-muted);
+                        margin-top: 16px;
+                        border-top: 1px solid var(--border);
+                        padding-top: 14px;
+                    }
+                    .download-secure-badge {
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                    }
+                    .download-secure-badge svg {
+                        width: 12px;
+                        height: 12px;
+                        color: var(--accent);
+                    }
+                    .download-success-state {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        text-align: center;
+                        padding: 32px 16px;
+                        animation: downloadModalScaleUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+                    }
+                    .success-icon-circle {
+                        width: 64px;
+                        height: 64px;
+                        border-radius: 50%;
+                        background-color: rgba(196, 164, 124, 0.12);
+                        border: 2px solid var(--accent);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-bottom: 20px;
+                        color: var(--accent);
+                    }
+                    .success-icon-circle svg {
+                        width: 28px;
+                        height: 28px;
+                    }
+                    .success-title {
+                        font-family: var(--font-display);
+                        font-size: 1.6rem;
+                        color: var(--text);
+                        margin-bottom: 8px;
+                    }
+                    .success-text {
+                        font-size: 0.92rem;
+                        color: var(--text-muted);
+                        margin-bottom: 24px;
+                        line-height: 1.5;
+                    }
+                    @keyframes downloadModalScaleUp {
+                        from {
+                            opacity: 0;
+                            transform: scale(0.92);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: scale(1);
+                        }
+                    }
+                    body.dark-mode .success-icon-circle {
+                        background-color: rgba(227, 193, 151, 0.12);
+                    }
+                </style>
                 <div class="modal-card">
-                    <div class="modal-header">
-                        <h3>Descarga Gratuita</h3>
-                        <button class="close-modal" id="close-download-modal" aria-label="Cerrar modal">
-                            <i data-lucide="x"></i>
-                        </button>
+                    <!-- Form Container -->
+                    <div id="download-modal-form-container">
+                        <div class="modal-header">
+                            <div>
+                                <span class="download-modal-brand">Die Brücke Atelier</span>
+                                <h3 style="margin-top: 4px;">Descarga Gratuita</h3>
+                            </div>
+                            <button class="close-modal" id="close-download-modal" aria-label="Cerrar modal">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="download-modal-lead" style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 20px; line-height: 1.5;">
+                                Ingresá tus datos para descargar inmediatamente: <br>
+                                <strong id="download-modal-prod-name" style="color: var(--accent); font-family: var(--font-display); font-size: 1.15rem; display: block; margin-top: 4px;"></strong>
+                            </p>
+                            <form id="download-lead-form">
+                                <div class="form-group">
+                                    <label for="download-name">Nombre Completo</label>
+                                    <div class="download-input-wrapper">
+                                        <input type="text" id="download-name" required placeholder="Ej: Juan Pérez">
+                                        <i data-lucide="user"></i>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="download-email">Correo Electrónico</label>
+                                    <div class="download-input-wrapper">
+                                        <input type="email" id="download-email" required placeholder="ejemplo@correo.com">
+                                        <i data-lucide="mail"></i>
+                                    </div>
+                                    <span class="help-text">El archivo PDF se descargará automáticamente al confirmar.</span>
+                                </div>
+                                <button type="submit" class="btn-primary w-full" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    <span>Confirmar y Descargar</span>
+                                    <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                                </button>
+                            </form>
+                            <div class="download-modal-footer">
+                                <div class="download-secure-badge">
+                                    <i data-lucide="shield-check"></i>
+                                    <span>Descarga 100% segura</span>
+                                </div>
+                                <span>Formatos: PDF, JPG, SVG</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <p class="download-modal-lead" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">
-                            Ingresá tu nombre y correo electrónico para iniciar la descarga de <strong id="download-modal-prod-name" style="color: var(--accent);"></strong>.
-                        </p>
-                        <form id="download-lead-form">
-                            <div class="form-group">
-                                <label for="download-name">Nombre Completo</label>
-                                <input type="text" id="download-name" required placeholder="Ej: Juan Pérez">
+
+                    <!-- Success State Container -->
+                    <div id="download-modal-success-container" style="display: none;">
+                        <div class="download-success-state">
+                            <div class="success-icon-circle">
+                                <i data-lucide="check"></i>
                             </div>
-                            <div class="form-group">
-                                <label for="download-email">Correo Electrónico</label>
-                                <input type="email" id="download-email" required placeholder="tuemail@correo.com">
-                                <span class="help-text">El archivo se descargará inmediatamente al confirmar.</span>
-                            </div>
-                            <button type="submit" class="btn-primary w-full" style="margin-top: 10px;">Confirmar y Descargar</button>
-                        </form>
+                            <h3 class="success-title">¡Descarga Iniciada!</h3>
+                            <p class="success-text" id="download-success-message">
+                                Gracias. Tu archivo comenzará a descargarse de forma automática en breve.
+                            </p>
+                            <button id="success-close-btn" class="btn-primary" style="min-width: 140px;">Entendido</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -616,6 +761,7 @@ function initDownloadModal() {
 
     const modal = document.getElementById('download-modal');
     const closeBtn = document.getElementById('close-download-modal');
+    const successCloseBtn = document.getElementById('success-close-btn');
     const form = document.getElementById('download-lead-form');
     const modalProdName = document.getElementById('download-modal-prod-name');
 
@@ -641,12 +787,18 @@ function initDownloadModal() {
         setTimeout(() => {
             if (!modal.classList.contains('open')) {
                 modal.style.display = 'none';
+                // Reset containers for next opening
+                document.getElementById('download-modal-form-container').style.display = 'block';
+                document.getElementById('download-modal-success-container').style.display = 'none';
             }
         }, 300);
         form.reset();
     }
 
     closeBtn.addEventListener('click', closeModal);
+    if (successCloseBtn) {
+        successCloseBtn.addEventListener('click', closeModal);
+    }
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
     });
@@ -670,43 +822,7 @@ function initDownloadModal() {
 
         if (!name || !email) return;
 
-        // 1. Save data to LocalStorage
-        const lead = {
-            name: name,
-            email: email,
-            product: activeProductName,
-            timestamp: new Date().toISOString()
-        };
-
-        let existingLeads = [];
-        try {
-            existingLeads = JSON.parse(localStorage.getItem('die_brucke_leads')) || [];
-        } catch (err) {
-            existingLeads = [];
-        }
-        existingLeads.push(lead);
-        localStorage.setItem('die_brucke_leads', JSON.stringify(existingLeads));
-
-        // 2. Generate and download registration txt file
-        const regContent = `--- REGISTRO DE DESCARGA ---
-Fecha: ${new Date().toLocaleString()}
-Producto: ${activeProductName}
-Nombre: ${name}
-Email: ${email}
-----------------------------`;
-        
-        const blob = new Blob([regContent], { type: 'text/plain;charset=utf-8' });
-        const regUrl = URL.createObjectURL(blob);
-        const regLink = document.createElement('a');
-        const formattedName = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
-        regLink.href = regUrl;
-        regLink.download = `registro_descarga_${formattedName}.txt`;
-        document.body.appendChild(regLink);
-        regLink.click();
-        document.body.removeChild(regLink);
-        URL.revokeObjectURL(regUrl);
-
-        // 3. Trigger product download
+        // Trigger product download
         const prodLink = document.createElement('a');
         prodLink.href = activeDownloadUrl;
         prodLink.download = activeDownloadFilename;
@@ -722,50 +838,12 @@ Email: ${email}
         setTimeout(() => {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
-            closeModal();
-            alert(`¡Gracias ${name}! La descarga de "${activeProductName}" ha comenzado. Se ha guardado tu registro localmente.`);
-        }, 1000);
+            
+            // Transition modal to success view
+            document.getElementById('download-modal-form-container').style.display = 'none';
+            document.getElementById('download-success-message').innerHTML = `¡Gracias, <strong>${name}</strong>!<br>La descarga de <strong>"${activeProductName}"</strong> ha comenzado automáticamente.`;
+            document.getElementById('download-modal-success-container').style.display = 'block';
+            lucide.createIcons(); // Render check icon inside circle
+        }, 800);
     });
-}
-
-// Administrative CSV Exporter Tool
-if (window.location.search.includes('export-leads=true')) {
-    exportLeadsToCSV();
-}
-
-function exportLeadsToCSV() {
-    let leads = [];
-    try {
-        leads = JSON.parse(localStorage.getItem('die_brucke_leads')) || [];
-    } catch (err) {
-        leads = [];
-    }
-
-    if (leads.length === 0) {
-        alert('No hay registros de descargas acumulados todavía.');
-        return;
-    }
-
-    let csvContent = '\uFEFF'; // UTF-8 BOM
-    csvContent += 'Fecha,Nombre,Email,Producto\n';
-
-    leads.forEach(lead => {
-        const date = new Date(lead.timestamp).toLocaleString();
-        const name = `"${lead.name.replace(/"/g, '""')}"`;
-        const email = `"${lead.email.replace(/"/g, '""')}"`;
-        const product = `"${lead.product.replace(/"/g, '""')}"`;
-        csvContent += `${date},${name},${email},${product}\n`;
-    });
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'die_brucke_leads.csv';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    alert(`Se exportaron con éxito ${leads.length} registros de descargas a "die_brucke_leads.csv".`);
 }
