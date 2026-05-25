@@ -9,6 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         .story-page {
             padding: 112px 0 80px;
@@ -234,6 +236,64 @@
     </style>
 </head>
 <body class="light-mode">
+    <!-- Navigation Header -->
+    <header class="main-header">
+        <div class="nav-container">
+            <a href="index.html" class="logo" id="header-logo">
+                <span class="logo-text">DIE BRÜCKE</span>
+                <span class="logo-sub">Atelier</span>
+            </a>
+
+            <nav class="nav-links" id="nav-menu">
+                <a href="index.html#inicio">Inicio</a>
+                <a href="index.html#catalogo">Catálogo</a>
+                <a href="index.html#galeria">Estudio</a>
+                <a href="index.html#contact-form-section">Contacto</a>
+                <a href="index.html#magdalena">Sobre Mí</a>
+
+                <!-- Link al Instagram de Magui -->
+                <a href="https://www.instagram.com/reel/DYF0lQhBTTI/?igsh=MTljczVhd3huMmJheg==" target="_blank" rel="noopener noreferrer">Videos IG</a>
+            </nav>
+
+            <div class="nav-actions">
+                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Cambiar tema de color">
+                    <i data-lucide="moon" class="moon-icon"></i>
+                    <i data-lucide="sun" class="sun-icon" style="display: none;"></i>
+                </button>
+                <a href="index.html#catalogo" class="btn-primary nav-cta">Descargar</a>
+                <button class="menu-toggle" id="mobile-menu-btn" aria-label="Abrir menú de navegación"
+                    aria-controls="mobile-drawer" aria-expanded="false">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="mobile-drawer" id="mobile-drawer">
+        <div class="drawer-header">
+            <span class="logo-text">Die Brucke</span>
+            <button class="close-drawer" id="close-drawer-btn" aria-label="Cerrar menú">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <nav class="drawer-links">
+            <a href="index.html#inicio" onclick="toggleDrawer()">Inicio</a>
+            <a href="index.html#catalogo" onclick="toggleDrawer()">Catálogo</a>
+            <a href="index.html#galeria" onclick="toggleDrawer()">Estudio</a>
+            <a href="index.html#contact-form-section" onclick="toggleDrawer()">Contacto</a>
+            <a href="index.html#magdalena" onclick="toggleDrawer()">Sobre Mí</a>
+            <a href="https://www.instagram.com/reel/DYF0lQhBTTI/?igsh=MTljczVhd3huMmJheg==" target="_blank" rel="noopener noreferrer">Videos IG</a>
+        </nav>
+        <div class="drawer-footer">
+            <button id="theme-toggle-mobile" class="theme-toggle-btn-mobile">
+                <i data-lucide="moon" class="moon-icon"></i> Oscuro
+            </button>
+            <a href="index.html#catalogo" class="btn-primary" onclick="toggleDrawer()">Explorar Assets</a>
+        </div>
+    </div>
+    <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop" aria-hidden="true"></div>
+
     <main class="story-page">
         <section class="grid-container story-hero">
             <article class="story-hero-content">

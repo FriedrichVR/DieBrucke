@@ -202,8 +202,10 @@ h1, h2, h3, h4 {
 
 /* Header & Navigation */
 .main-header {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    width: 100%;
     z-index: 999;
     background-color: rgba(251, 249, 250, 0.8);
     backdrop-filter: blur(12px);
