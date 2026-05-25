@@ -67,7 +67,21 @@
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-lg);
             padding: 34px;
+            margin: 0 auto 26px;
+            max-width: 800px;
+        }
+
+        .story-details-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            align-items: start;
             margin-bottom: 26px;
+        }
+
+        .story-details-layout .story-section {
+            max-width: 100%;
+            margin: 0;
         }
 
         .story-section h2 {
@@ -158,6 +172,11 @@
                 grid-template-columns: 1fr;
             }
 
+            .story-details-layout {
+                grid-template-columns: 1fr;
+                gap: 26px;
+            }
+
             .story-gallery {
                 grid-template-columns: 1fr 1fr;
             }
@@ -243,68 +262,60 @@
             </article>
         </section>
 
-        <section class="grid-container story-section">
-            <h2>Trayectoria</h2>
-            <div class="timeline">
-                <article class="timeline-item">
-                    <span class="timeline-year">2016</span>
-                    <div class="timeline-copy">
-                        <h3>Primeros pasos</h3>
-                        <p>Egresada con honores del instituto de física nuclear en Berlin.</p>
-                    </div>
-                </article>
-                <article class="timeline-item">
-                    <span class="timeline-year">2019</span>
-                    <div class="timeline-copy">
-                        <h3>Maestría</h3>
-                        <p>Magdalena cuenta además con una maestría en Diseño y simulación de procesos industriales.</p>
-                    </div>
-                </article>
-                <article class="timeline-item">
-                    <span class="timeline-year">2022</span>
-                    <div class="timeline-copy">
-                        <h3>Nace Die Brucke</h3>
-                        <p>Despúes del estudio se propone crear un espacio creativo en donde reinaría la experimentación, la exploración y el desarrollo personal.</p>
-                    </div>
-                </article>
-                <article class="timeline-item">
-                    <span class="timeline-year">Hoy</span>
-                    <div class="timeline-copy">
-                        <h3>Comunidad y evolución continua</h3>
-                        <p>Es una activista por los derechos de los animales y una defensora incansable de la educación pública.</p>
-                    </div>
-                </article>
-            </div>
-        </section>
-
-        <section class="grid-container story-section">
-            <h2>Vida y proceso creativo</h2>
-
-            <p>La vida, al igual que el proceso creativo, no se trata de buscar la perfección, sino de disfrutar el viaje.</p>
-            <br>
-
-            <p>Las mejores ideas nacen de lo simple: de un paisaje, de una caminata o del juego libre con lo cotidiano.</p>
-            <br>
-
-            <p>Crear es animarse a pausar el ruido, conectar con las manos y transformar un pedacito de papel en algo propio. 
-                No hace falta saber el final; solo hace falta empezar.</p>
-
-
-            <div class="story-gallery">
-                <figure>
-                    <img src="images/d1.jpg" alt="Mesa de trabajo con planos y referencias">
-                    <figcaption>Sesiones de ideación y selección de referencias.</figcaption>
-                </figure>
-                <figure>
-                    <img src="images/d2.jpg" alt="Detalle de composición visual y materiales">
-                    <figcaption>Curaduría de materiales y limpieza de estilo.</figcaption>
-                </figure>
-                <figure>
-                    <img src="images/d3.jpg" alt="Visual digital del proceso de producción">
-                    <figcaption>Producción final de recursos para publicación.</figcaption>
-                </figure>
-            </div>
-        </section>
+        <div class="grid-container story-details-layout">
+            <section class="story-section">
+                <h2>Trayectoria</h2>
+                <p><b>El regreso a crear</b></p><br>
+    
+                <p>Durante años viví entre trabajos full time y horas de estudio, dejando poco espacio para mi lado creativo.
+                Este año decidí volver a conectar con esa parte: bajar el ritmo, recuperar tiempo para experimentar y empezar a compartir lo que hago.</p><br>
+    
+                <p><b>Crear sin producir en masa</b></p><br>
+    
+                <p>Die Brucke nace desde la idea de crear sin seguir una única temática o estructura fija.
+                No busco producir en serie ni trabajar por cantidad, sino desarrollar proyectos que surjan desde la inspiración, la curiosidad y las ganas de probar cosas nuevas.</p><br>
+    
+                <p><b>Lo digital + lo analógico</b></p><br>
+    
+                <p>Me inspira mezclar mundos:
+                los años 90, lo vintage, lo editorial, las texturas, lo artesanal y lo analógico, combinado con herramientas digitales, ilustración y diseño contemporáneo.</p>
+                <br>
+                <p><b>Cada proyecto es una combinación de materiales, ideas y procesos distintos.</b></p>
+            </section>
+    
+            <section class="story-section">
+                <h2>Hoy</h2>
+    
+                <p>Die Brucke es un espacio creativo en constante transformación. 
+                Un lugar donde las ilustraciones, los imprimibles y los objetos digitales se convierten en proyectos reales para crear, intervenir y compartir.</p>
+                <br>
+    
+                <p>Vida y proceso creativo.</p>
+                <br>
+    
+                <p>No creo en la perfección ni en seguir siempre una misma línea.
+                Me interesa experimentar, editar, combinar elementos y dejar que cada idea tome su propia forma.</p>
+    
+                <br>
+    
+                <p>Crear, para mí, es volver a encontrar tiempo para imaginar.</p>
+    
+                <div class="story-gallery">
+                    <figure>
+                        <img src="images/personal/personal1.jpg" alt="Mesa de trabajo con planos y referencias">
+                        <figcaption>Sesiones de ideación y selección de referencias.</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="images/d2.jpg" alt="Detalle de composición visual y materiales">
+                        <figcaption>Curaduría de materiales y limpieza de estilo.</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="images/d3.jpg" alt="Visual digital del proceso de producción">
+                        <figcaption>Producción final de recursos para publicación.</figcaption>
+                    </figure>
+                </div>
+            </section>
+        </div>
 
 
     </main>

@@ -441,17 +441,28 @@ function closeHelpModal() {
    ========================================================================== */
 function handleNewsletterSubmit(event) {
     event.preventDefault();
+    const nameInput = document.getElementById('newsletter-name');
     const emailInput = document.getElementById('newsletter-email');
     const feedbackMsg = document.getElementById('newsletter-message');
 
-    if (!emailInput || !feedbackMsg) return;
+    if (!nameInput || !emailInput || !feedbackMsg) return;
+
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
 
     feedbackMsg.textContent = 'Procesando registro...';
     feedbackMsg.className = 'form-feedback-message';
 
+    sendToN8N({
+        name: name,
+        email: email,
+        source: 'newsletter'
+    });
+
     setTimeout(() => {
         feedbackMsg.textContent = '¡Te has registrado con éxito! Pronto recibirás tus primeros assets gratis.';
         feedbackMsg.className = 'form-feedback-message success';
+        nameInput.value = '';
         emailInput.value = '';
         
         // Clear message after 5 seconds
