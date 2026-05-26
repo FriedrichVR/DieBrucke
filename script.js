@@ -802,6 +802,57 @@ function initDownloadModal() {
                     body.dark-mode .success-icon-circle {
                         background-color: rgba(227, 193, 151, 0.12);
                     }
+                    .donation-option-buttons {
+                        display: grid;
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 12px;
+                        width: 100%;
+                        margin: 20px 0;
+                    }
+                    .btn-donate {
+                        background: var(--surface-low);
+                        border: 1px solid var(--border);
+                        color: var(--text);
+                        padding: 10px 14px;
+                        border-radius: var(--radius-md);
+                        font-family: var(--font-display);
+                        font-weight: 600;
+                        font-size: 0.88rem;
+                        cursor: pointer;
+                        transition: var(--transition-smooth);
+                        text-align: center;
+                    }
+                    .btn-donate:hover {
+                        border-color: var(--accent);
+                        background: rgba(196, 164, 124, 0.08);
+                        transform: translateY(-2px);
+                    }
+                    .btn-donate:disabled {
+                        opacity: 0.6;
+                        cursor: not-allowed;
+                    }
+                    .btn-skip-donate {
+                        background: transparent;
+                        border: 1px solid var(--border);
+                        color: var(--text-muted);
+                        padding: 10px 14px;
+                        border-radius: var(--radius-md);
+                        font-family: var(--font-body);
+                        font-weight: 500;
+                        font-size: 0.84rem;
+                        cursor: pointer;
+                        width: 100%;
+                        transition: var(--transition-smooth);
+                        text-align: center;
+                        margin-top: 8px;
+                    }
+                    .btn-skip-donate:hover {
+                        color: var(--text);
+                        border-color: var(--text-muted);
+                    }
+                    body.dark-mode .btn-donate:hover {
+                        background: rgba(227, 193, 151, 0.08);
+                    }
                 </style>
                 <div class="modal-card">
                     <!-- Form Container -->
@@ -848,6 +899,26 @@ function initDownloadModal() {
                                 </div>
                                 <span>Formatos: PDF, JPG, SVG</span>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Donation Container -->
+                    <div id="download-modal-donation-container" style="display: none;">
+                        <div class="download-success-state">
+                            <div class="success-icon-circle" style="background-color: rgba(196, 164, 124, 0.08); border-color: var(--accent);">
+                                <i data-lucide="heart" style="color: var(--accent); width: 28px; height: 28px;"></i>
+                            </div>
+                            <h3 class="success-title">¿Querés apoyar mi trabajo?</h3>
+                            <p class="success-text" style="margin-bottom: 12px; line-height: 1.5;">
+                                Este recurso digital es gratuito. Si valorás el tiempo y esfuerzo dedicado al atelier, podés realizar una contribución voluntaria para apoyarlo:
+                            </p>
+                            <div class="donation-option-buttons">
+                                <button class="btn-donate" data-amount="500">Contribuir $500</button>
+                                <button class="btn-donate" data-amount="1000">Contribuir $1.000</button>
+                                <button class="btn-donate" data-amount="2000">Contribuir $2.000</button>
+                                <button class="btn-donate" data-amount="5000">Contribuir $5.000</button>
+                            </div>
+                            <button id="skip-donation-btn" class="btn-skip-donate">No donar, iniciar descarga gratuita</button>
                         </div>
                     </div>
 
@@ -901,6 +972,7 @@ function initDownloadModal() {
                 modal.style.display = 'none';
                 // Reset containers for next opening
                 document.getElementById('download-modal-form-container').style.display = 'block';
+                document.getElementById('download-modal-donation-container').style.display = 'none';
                 document.getElementById('download-modal-success-container').style.display = 'none';
             }
         }, 300);
@@ -927,6 +999,25 @@ function initDownloadModal() {
         });
     });
 
+    // Helper function to trigger actual file download
+    function triggerDownload() {
+        const prodLink = document.createElement('a');
+        prodLink.href = activeDownloadUrl;
+        prodLink.download = activeDownloadFilename;
+        document.body.appendChild(prodLink);
+        prodLink.click();
+        document.body.removeChild(prodLink);
+    }
+
+    // Helper function to show final success state
+    function showSuccessState(name) {
+        document.getElementById('download-modal-form-container').style.display = 'none';
+        document.getElementById('download-modal-donation-container').style.display = 'none';
+        document.getElementById('download-success-message').innerHTML = `¡Gracias, <strong>${name}</strong>!<br>La descarga de <strong>"${activeProductName}"</strong> ha comenzado automáticamente.`;
+        document.getElementById('download-modal-success-container').style.display = 'block';
+        lucide.createIcons();
+    }
+
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         const name = document.getElementById('download-name').value.trim();
@@ -934,7 +1025,7 @@ function initDownloadModal() {
 
         if (!name || !email) return;
 
-        // Send to n8n webhook
+        // Send lead info to n8n in the background
         sendToN8N({
             name: name,
             email: email,
@@ -944,28 +1035,77 @@ function initDownloadModal() {
             source: 'download_modal'
         });
 
-        // Trigger product download
-        const prodLink = document.createElement('a');
-        prodLink.href = activeDownloadUrl;
-        prodLink.download = activeDownloadFilename;
-        document.body.appendChild(prodLink);
-        prodLink.click();
-        document.body.removeChild(prodLink);
+        // Hide form and show donation panel
+        document.getElementById('download-modal-form-container').style.display = 'none';
+        document.getElementById('download-modal-donation-container').style.display = 'block';
+        lucide.createIcons(); // Render heart icon
+    });
 
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Iniciando descarga...';
+    // Handle Skip Donation (Free download)
+    const skipBtn = document.getElementById('skip-donation-btn');
+    if (skipBtn) {
+        skipBtn.addEventListener('click', () => {
+            const name = document.getElementById('download-name').value.trim();
+            triggerDownload();
+            showSuccessState(name);
+        });
+    }
 
-        setTimeout(() => {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-            
-            // Transition modal to success view
-            document.getElementById('download-modal-form-container').style.display = 'none';
-            document.getElementById('download-success-message').innerHTML = `¡Gracias, <strong>${name}</strong>!<br>La descarga de <strong>"${activeProductName}"</strong> ha comenzado automáticamente.`;
-            document.getElementById('download-modal-success-container').style.display = 'block';
-            lucide.createIcons(); // Render check icon inside circle
-        }, 800);
+    // Handle Donation Buttons (Mercado Pago API)
+    const donationBtns = document.querySelectorAll('.btn-donate');
+    donationBtns.forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const amount = btn.getAttribute('data-amount');
+            const name = document.getElementById('download-name').value.trim();
+
+            // Disable buttons during API request
+            donationBtns.forEach(b => b.disabled = true);
+            const originalText = btn.textContent;
+            btn.textContent = 'Procesando...';
+
+            // Also disable the skip button
+            if (skipBtn) skipBtn.disabled = true;
+
+            try {
+                // Call the Vercel serverless function endpoint to create preference
+                const response = await fetch('/api/create-preference', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: Number(amount),
+                        title: `Contribución voluntaria - ${activeProductName}`
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('API error creating preference');
+                }
+
+                const data = await response.json();
+                
+                // Open Mercado Pago checkout in a new window/tab
+                if (data.init_point) {
+                    window.open(data.init_point, '_blank');
+                } else {
+                    console.error('No init_point returned', data);
+                }
+
+            } catch (error) {
+                console.error('Error initiating donation:', error);
+                alert('Hubo un inconveniente al conectar con Mercado Pago. Iniciando la descarga gratuita de todos modos.');
+            } finally {
+                // Restore button states
+                btn.textContent = originalText;
+                donationBtns.forEach(b => b.disabled = false);
+                if (skipBtn) skipBtn.disabled = false;
+
+                // Download the file anyway
+                triggerDownload();
+                // Show final success screen
+                showSuccessState(name);
+            }
+        });
     });
 }
