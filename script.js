@@ -22,6 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Product Carousels
     initProductCarousels();
 
+    // Initialize Story Carousel
+    initStoryCarousel();
+
     // Initialize Download Lead Modal
     initDownloadModal();
 });
@@ -625,6 +628,60 @@ function initProductCarousels() {
             });
         });
     });
+}
+
+/* ==========================================================================
+   8.5. Story Carousel (Historia de Magdalena)
+   ========================================================================== */
+function initStoryCarousel() {
+    const carousel = document.querySelector('.story-carousel');
+    if (!carousel) return;
+
+    const slides = carousel.querySelectorAll('.story-carousel-slides img');
+    const dots = carousel.querySelectorAll('.story-carousel-dots .story-dot');
+    let currentSlide = 0;
+    let autoSlideInterval;
+
+    function showSlide(index) {
+        if (index < 0) {
+            currentSlide = slides.length - 1;
+        } else if (index >= slides.length) {
+            currentSlide = 0;
+        } else {
+            currentSlide = index;
+        }
+
+        slides.forEach((slide, i) => {
+            slide.classList.toggle('active', i === currentSlide);
+        });
+
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentSlide);
+        });
+    }
+
+    function nextSlide() {
+        showSlide(currentSlide + 1);
+    }
+
+    function startAutoSlide() {
+        autoSlideInterval = setInterval(nextSlide, 4000);
+    }
+
+    function resetAutoSlide() {
+        clearInterval(autoSlideInterval);
+        startAutoSlide();
+    }
+
+    // Add click event to dots
+    dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+            showSlide(i);
+            resetAutoSlide();
+        });
+    });
+
+    startAutoSlide();
 }
 
 /* ==========================================================================
