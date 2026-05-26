@@ -1120,41 +1120,234 @@ function initCoffeeButton() {
     const coffeeBtn = document.getElementById('buy-coffee-btn');
     if (!coffeeBtn) return;
 
-    coffeeBtn.addEventListener('click', async () => {
-        coffeeBtn.disabled = true;
-        const originalContent = coffeeBtn.innerHTML;
-        // Show processing status
-        coffeeBtn.innerHTML = '<span>Procesando...</span>';
+    // Inject coffee modal if it doesn't exist
+    if (!document.getElementById('coffee-modal')) {
+        const modalHTML = `
+            <div class="modal-overlay" id="coffee-modal" style="display: none;">
+                <style>
+                    #coffee-modal .modal-card {
+                        border-top: 4px solid var(--accent);
+                        max-width: 400px;
+                        overflow: visible;
+                    }
+                    .coffee-quick-options {
+                        display: grid;
+                        grid-template-columns: repeat(3, 1fr);
+                        gap: 12px;
+                        margin: 18px 0;
+                    }
+                    .btn-coffee-option {
+                        background: var(--surface-low);
+                        border: 1px solid var(--border);
+                        color: var(--text);
+                        padding: 12px 10px;
+                        border-radius: var(--radius-md);
+                        font-family: var(--font-display);
+                        font-weight: 600;
+                        font-size: 0.95rem;
+                        cursor: pointer;
+                        transition: var(--transition-smooth);
+                        text-align: center;
+                    }
+                    .btn-coffee-option:hover,
+                    .btn-coffee-option.active {
+                        border-color: var(--accent);
+                        background: rgba(196, 164, 124, 0.08);
+                        transform: translateY(-2px);
+                    }
+                    body.dark-mode .btn-coffee-option:hover,
+                    body.dark-mode .btn-coffee-option.active {
+                        background: rgba(227, 193, 151, 0.08);
+                    }
+                    .custom-amount-group {
+                        margin-bottom: 24px;
+                    }
+                    .custom-amount-input-wrapper {
+                        position: relative;
+                        display: flex;
+                        align-items: center;
+                    }
+                    .custom-amount-input-wrapper span {
+                        position: absolute;
+                        left: 16px;
+                        color: var(--text-muted);
+                        font-weight: 600;
+                        font-size: 1.1rem;
+                    }
+                    .custom-amount-input-wrapper input {
+                        width: 100%;
+                        padding: 12px 16px 12px 34px !important;
+                        border: 1px solid var(--border);
+                        border-radius: var(--radius-md);
+                        background: var(--surface);
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        transition: var(--transition-smooth);
+                    }
+                    .custom-amount-input-wrapper input:focus {
+                        border-color: var(--accent);
+                    }
+                    .custom-amount-input-wrapper input::-webkit-outer-spin-button,
+                    .custom-amount-input-wrapper input::-webkit-inner-spin-button {
+                        -webkit-appearance: none;
+                        margin: 0;
+                    }
+                    .custom-amount-input-wrapper input[type=number] {
+                        -moz-appearance: textfield;
+                    }
+                </style>
+                <div class="modal-card">
+                    <div class="modal-header">
+                        <div>
+                            <span class="download-modal-brand">Apoya el Atelier</span>
+                            <h3 style="margin-top: 4px;">Invitame un Cafecito ☕</h3>
+                        </div>
+                        <button class="close-modal" id="close-coffee-modal" aria-label="Cerrar modal">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.5; margin-bottom: 12px;">
+                            Si valorás mi trabajo y querés contribuir, podés realizar una contribución voluntaria para apoyar el atelier:
+                        </p>
+                        
+                        <div class="coffee-quick-options">
+                            <button class="btn-coffee-option active" data-val="500">$500</button>
+                            <button class="btn-coffee-option" data-val="2000">$2.000</button>
+                            <button class="btn-coffee-option" data-val="5000">$5.000</button>
+                        </div>
 
-        try {
-            const response = await fetch('/api/create-preference', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    amount: 500,
-                    title: 'Invitame un cafecito ☕'
-                })
-            });
+                        <div class="form-group custom-amount-group">
+                            <label for="coffee-custom-amount" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; display: block; color: var(--text-muted);">Otro monto a tu consideración (ARS)</label>
+                            <div class="custom-amount-input-wrapper">
+                                <span>$</span>
+                                <input type="number" id="coffee-custom-amount" min="10" placeholder="Ej: 1500" value="500">
+                            </div>
+                        </div>
 
-            if (!response.ok) {
-                throw new Error('API error creating preference');
+                        <button id="confirm-coffee-btn" class="btn-primary w-full" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <span>Confirmar y Contribuir</span>
+                            <i data-lucide="heart" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        lucide.createIcons();
+    }
+
+    const modal = document.getElementById('coffee-modal');
+    const closeBtn = document.getElementById('close-coffee-modal');
+    const quickOptions = modal.querySelectorAll('.btn-coffee-option');
+    const customInput = document.getElementById('coffee-custom-amount');
+    const confirmBtn = document.getElementById('confirm-coffee-btn');
+
+    function openModal() {
+        modal.style.display = 'flex';
+        modal.offsetHeight; // Reflow
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+        setTimeout(() => {
+            if (!modal.classList.contains('open')) {
+                modal.style.display = 'none';
             }
+        }, 300);
+    }
 
-            const data = await response.json();
-            if (data.init_point) {
-                window.open(data.init_point, '_blank');
-            } else {
-                console.error('No init_point returned', data);
-            }
-        } catch (error) {
-            console.error('Error creating coffee payment:', error);
-            alert('Hubo un inconveniente al conectar con Mercado Pago. Por favor intenta más tarde.');
-        } finally {
-            // Restore button content
-            coffeeBtn.innerHTML = originalContent;
-            coffeeBtn.disabled = false;
-        }
+    // Bind trigger button
+    coffeeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal();
     });
+
+    // Close button
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+    }
+
+    // Close on overlay click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    // Quick option selections
+    quickOptions.forEach(btn => {
+        btn.addEventListener('click', () => {
+            quickOptions.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const value = btn.getAttribute('data-val');
+            if (customInput) {
+                customInput.value = value;
+            }
+        });
+    });
+
+    // Deselect quick options when custom input is edited manually
+    if (customInput) {
+        customInput.addEventListener('input', () => {
+            const currentVal = customInput.value;
+            quickOptions.forEach(b => {
+                const optVal = b.getAttribute('data-val');
+                if (optVal === currentVal) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+            });
+        });
+    }
+
+    // Confirm Payment
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', async () => {
+            const amountVal = customInput ? Number(customInput.value) : 500;
+            if (!amountVal || isNaN(amountVal) || amountVal < 10) {
+                alert('Por favor ingresá un monto válido (mínimo $10 ARS).');
+                return;
+            }
+
+            confirmBtn.disabled = true;
+            const originalText = confirmBtn.querySelector('span').textContent;
+            confirmBtn.querySelector('span').textContent = 'Procesando...';
+
+            try {
+                const response = await fetch('/api/create-preference', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: amountVal,
+                        title: 'Invitame un cafecito ☕'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('API error creating preference');
+                }
+
+                const data = await response.json();
+                if (data.init_point) {
+                    window.open(data.init_point, '_blank');
+                    closeModal();
+                } else {
+                    console.error('No init_point returned', data);
+                    alert('No se pudo iniciar el pago.');
+                }
+            } catch (error) {
+                console.error('Error creating coffee payment:', error);
+                alert('Hubo un inconveniente al conectar con Mercado Pago. Por favor intenta más tarde.');
+            } finally {
+                confirmBtn.querySelector('span').textContent = originalText;
+                confirmBtn.disabled = false;
+            }
+        });
+    }
 }
