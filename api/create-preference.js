@@ -32,7 +32,7 @@ export default async function handler(req, res) {
         const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
             method: 'POST',
             headers: {
-                'Authorization': 'Bearer APP_USR-3806651059069241-052616-383e6d8e93e245a77264d35d4ad6921c-3429542814',
+                'Authorization': `Bearer ${process.env.MP_ACCESS_TOKEN}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
