@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Download Lead Modal
     initDownloadModal();
+
+    // Initialize Coffee Donation Button
+    initCoffeeButton();
 });
 
 /* ==========================================================================
@@ -1107,5 +1110,51 @@ function initDownloadModal() {
                 showSuccessState(name);
             }
         });
+    });
+}
+
+/* ==========================================================================
+   10. Coffee Donation Button
+   ========================================================================== */
+function initCoffeeButton() {
+    const coffeeBtn = document.getElementById('buy-coffee-btn');
+    if (!coffeeBtn) return;
+
+    coffeeBtn.addEventListener('click', async () => {
+        coffeeBtn.disabled = true;
+        const originalContent = coffeeBtn.innerHTML;
+        // Show processing status
+        coffeeBtn.innerHTML = '<span>Procesando...</span>';
+
+        try {
+            const response = await fetch('/api/create-preference', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: 500,
+                    title: 'Invitame un cafecito ☕'
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('API error creating preference');
+            }
+
+            const data = await response.json();
+            if (data.init_point) {
+                window.open(data.init_point, '_blank');
+            } else {
+                console.error('No init_point returned', data);
+            }
+        } catch (error) {
+            console.error('Error creating coffee payment:', error);
+            alert('Hubo un inconveniente al conectar con Mercado Pago. Por favor intenta más tarde.');
+        } finally {
+            // Restore button content
+            coffeeBtn.innerHTML = originalContent;
+            coffeeBtn.disabled = false;
+        }
     });
 }
