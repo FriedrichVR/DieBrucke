@@ -522,12 +522,14 @@ function handleContactSubmit(event) {
 
     const name = document.getElementById('contact-name').value.trim();
     const email = document.getElementById('contact-email').value.trim();
+    const phone = document.getElementById('contact-phone') ? document.getElementById('contact-phone').value.trim() : '';
     const projectType = document.getElementById('contact-project-type').value;
     const message = document.getElementById('contact-message').value.trim();
 
     sendToN8N({
         name: name,
         email: email,
+        phone: phone,
         projectType: projectType,
         message: message,
         source: 'contact_form'

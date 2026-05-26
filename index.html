@@ -424,19 +424,24 @@
                                 <input type="email" id="contact-email" required placeholder="ejemplo@correo.com">
                             </div>
                             <div class="form-group">
-                                <label for="contact-project-type">Tipo de Proyecto</label>
-                                <select id="contact-project-type">
-                                    <option value="dwg">Plano CAD (DWG)</option>
-                                    <option value="3d">Modelo 3D (OBJ/FBX)</option>
-                                    <option value="pbr">Texturas Personalizadas</option>
-                                    <option value="other">Otro Requerimiento</option>
-                                </select>
+                                <label for="contact-phone">Teléfono</label>
+                                <input type="tel" id="contact-phone" placeholder="Ej: +54 294 4123456">
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-project-type">Tipo de Proyecto</label>
+                            <select id="contact-project-type">
+                                <option value="dwg">Escarapelas</option>
+                                <option value="3d">Banderines</option>
+                                <option value="pbr">E-books personalizado</option>
+                                <option value="other">Flyers</option>
+                                <option value="other">Otro encargo</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="contact-message">Detalles del Encargo</label>
                             <textarea id="contact-message" rows="4" required
-                                placeholder="Describí las dimensiones, estilo arquitectónico, formatos requeridos y plazos..."></textarea>
+                                placeholder="Describí en forma breve lo que necesitás"></textarea>
                         </div>
                         <button type="submit" class="btn-primary w-full">Enviar Solicitud</button>
                         <div id="contact-message-feedback" class="form-feedback-message"></div>
