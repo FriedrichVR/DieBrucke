@@ -171,16 +171,20 @@ function initCatalogFilter() {
     const filterChips = document.querySelectorAll('.filter-chips .chip');
     const cards = document.querySelectorAll('.catalog-card');
 
-    let currentFilter = 'all';
+    let currentFilter = 'Todos';
     let searchQuery = '';
 
     function filterCatalog() {
         cards.forEach(card => {
-            const cardCategory = card.getAttribute('data-category');
+            const cardCategory = card.getAttribute('data-category') || '';
+            const cardCategories = cardCategory.toLowerCase().split(/\s+/);
             const cardTitle = card.querySelector('h3').textContent.toLowerCase();
             const cardDesc = card.querySelector('.card-desc').textContent.toLowerCase();
             
-            const categoryMatch = currentFilter === 'all' || cardCategory === currentFilter;
+            const filterLower = currentFilter.toLowerCase();
+            const categoryMatch = filterLower === 'all' || 
+                                  filterLower === 'todos' || 
+                                  cardCategories.includes(filterLower);
             const searchMatch = cardTitle.includes(searchQuery) || cardDesc.includes(searchQuery);
 
             if (categoryMatch && searchMatch) {
