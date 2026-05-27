@@ -296,6 +296,15 @@ function initCarousel() {
         startAutoSlide();
     }
 
+    // Touch Swipe Support for mobile
+    addSwipeSupport(carousel, () => {
+        nextSlide();
+        resetAutoSlide();
+    }, () => {
+        prevSlide();
+        resetAutoSlide();
+    });
+
     startAutoSlide();
 }
 
@@ -636,6 +645,13 @@ function initProductCarousels() {
                 showSlide(dotIdx);
             });
         });
+
+        // Touch Swipe Support for mobile
+        addSwipeSupport(carousel, () => {
+            showSlide(currentIdx + 1);
+        }, () => {
+            showSlide(currentIdx - 1);
+        });
     });
 }
 
@@ -688,6 +704,15 @@ function initStoryCarousel() {
             showSlide(i);
             resetAutoSlide();
         });
+    });
+
+    // Touch Swipe Support for mobile
+    addSwipeSupport(carousel, () => {
+        showSlide(currentSlide + 1);
+        resetAutoSlide();
+    }, () => {
+        showSlide(currentSlide - 1);
+        resetAutoSlide();
     });
 
     startAutoSlide();
@@ -1357,3 +1382,36 @@ function initCoffeeButton() {
         });
     }
 }
+
+/* ==========================================================================
+   11. Swipe Gesture Support for Touch Screens
+   ========================================================================== */
+function addSwipeSupport(element, onSwipeLeft, onSwipeRight) {
+    let startX = 0;
+    let startY = 0;
+    
+    element.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+    }, { passive: true });
+    
+    element.addEventListener('touchend', (e) => {
+        if (!startX || !startY) return;
+        
+        let diffX = e.changedTouches[0].clientX - startX;
+        let diffY = e.changedTouches[0].clientY - startY;
+        
+        // Threshold: 50px horizontal and more horizontal than vertical movement
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+            if (diffX > 0) {
+                if (typeof onSwipeRight === 'function') onSwipeRight();
+            } else {
+                if (typeof onSwipeLeft === 'function') onSwipeLeft();
+            }
+        }
+        
+        startX = 0;
+        startY = 0;
+    }, { passive: true });
+}
+

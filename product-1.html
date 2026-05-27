@@ -250,38 +250,57 @@
         @media (max-width: 992px) {
             .product-layout {
                 grid-template-columns: 1fr;
+                gap: 28px;
             }
 
             .product-media {
-                height: 420px;
+                height: clamp(280px, 45vh, 420px);
             }
 
             .product-info {
                 position: static;
+                padding: 24px;
             }
 
             .product-guarantees {
                 grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .guarantee-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                text-align: left;
+                padding: 8px 12px;
+                font-size: 0.76rem;
+            }
+
+            .guarantee-item::before {
+                content: '✓';
+                color: var(--accent);
+                font-weight: bold;
+                flex-shrink: 0;
             }
         }
 
         @media (max-width: 640px) {
             .product-detail {
-                padding: 92px 0 56px;
+                padding: 86px 0 48px;
             }
 
             .product-breadcrumb {
                 font-size: 0.78rem;
                 gap: 6px;
-                margin-bottom: 14px;
+                margin-bottom: 12px;
             }
 
             .product-title {
-                font-size: 1.75rem;
+                font-size: 1.65rem;
             }
 
             .product-info {
-                padding: 18px;
+                padding: 20px;
             }
 
             .product-topline {
@@ -289,9 +308,10 @@
             }
 
             .price-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 2px;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 14px;
             }
 
             .media-badge {
@@ -301,22 +321,33 @@
                 padding: 6px 10px;
             }
 
+            .product-specs {
+                margin: 16px 0 20px;
+                gap: 8px;
+            }
+
             .product-specs li {
-                flex-direction: column;
-                gap: 4px;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                gap: 12px;
+                font-size: 0.8rem;
+                padding-bottom: 8px;
             }
 
             .spec-value {
-                text-align: left;
+                text-align: right;
             }
 
             .product-actions {
                 flex-direction: column;
+                gap: 10px;
             }
 
             .product-actions .btn-primary,
             .product-actions .btn-secondary {
                 width: 100%;
+                min-height: 48px;
             }
         }
     </style>
@@ -358,18 +389,57 @@
     <!-- Mobile Navigation Drawer -->
     <div class="mobile-drawer" id="mobile-drawer">
         <div class="drawer-header">
-            <span class="logo-text">Die Brucke</span>
+            <div class="logo">
+                <span class="logo-text">DIE BRÜCKE</span>
+                <span class="logo-sub">Atelier</span>
+            </div>
             <button class="close-drawer" id="close-drawer-btn" aria-label="Cerrar menú">
                 <i data-lucide="x"></i>
             </button>
         </div>
         <nav class="drawer-links">
-            <a href="index.html#inicio" onclick="toggleDrawer()">Inicio</a>
-            <a href="index.html#catalogo" onclick="toggleDrawer()">Catálogo</a>
-            <a href="index.html#galeria" onclick="toggleDrawer()">Estudio</a>
-            <a href="index.html#contact-form-section" onclick="toggleDrawer()">Contacto</a>
-            <a href="index.html#magdalena" onclick="toggleDrawer()">Sobre Mí</a>
-            <a href="https://www.instagram.com/reel/DYF0lQhBTTI/?igsh=MTljczVhd3huMmJheg==" target="_blank" rel="noopener noreferrer">Videos IG</a>
+            <a href="index.html#inicio" onclick="toggleDrawer()">
+                <i data-lucide="home"></i>
+                <div class="link-text">
+                    <span class="link-title">Inicio</span>
+                    <span class="link-sub">Portada principal</span>
+                </div>
+            </a>
+            <a href="index.html#catalogo" onclick="toggleDrawer()">
+                <i data-lucide="book-open"></i>
+                <div class="link-text">
+                    <span class="link-title">Catálogo</span>
+                    <span class="link-sub">Recursos creativos</span>
+                </div>
+            </a>
+            <a href="index.html#galeria" onclick="toggleDrawer()">
+                <i data-lucide="pen-tool"></i>
+                <div class="link-text">
+                    <span class="link-title">Estudio</span>
+                    <span class="link-sub">Estética y procesos</span>
+                </div>
+            </a>
+            <a href="index.html#contact-form-section" onclick="toggleDrawer()">
+                <i data-lucide="mail"></i>
+                <div class="link-text">
+                    <span class="link-title">Contacto</span>
+                    <span class="link-sub">Consultas y encargos</span>
+                </div>
+            </a>
+            <a href="index.html#magdalena" onclick="toggleDrawer()">
+                <i data-lucide="user"></i>
+                <div class="link-text">
+                    <span class="link-title">Sobre Mí</span>
+                    <span class="link-sub">Filosofía e historia</span>
+                </div>
+            </a>
+            <a href="https://www.instagram.com/reel/DYF0lQhBTTI/?igsh=MTljczVhd3huMmJheg==" target="_blank" rel="noopener noreferrer">
+                <i data-lucide="instagram"></i>
+                <div class="link-text">
+                    <span class="link-title">Videos IG</span>
+                    <span class="link-sub">Inspiración en video</span>
+                </div>
+            </a>
         </nav>
         <div class="drawer-footer">
             <button id="theme-toggle-mobile" class="theme-toggle-btn-mobile">

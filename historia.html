@@ -238,51 +238,109 @@
 
         @media (max-width: 640px) {
             .story-page {
-                padding-top: 90px;
-                padding-bottom: 56px;
+                padding-top: 86px;
+                padding-bottom: 48px;
             }
 
             .story-hero-content,
             .story-section {
-                padding: 22px;
+                padding: 22px 18px;
+            }
+
+            .story-carousel {
+                min-height: 320px;
+                height: 320px;
             }
 
             .story-hero-media img {
-                min-height: 280px;
+                height: 100%;
+                min-height: auto;
             }
 
             .story-hero-content h1 {
-                font-size: 2rem;
+                font-size: 1.85rem;
             }
 
             .story-section h2 {
-                font-size: 1.5rem;
+                font-size: 1.45rem;
+                margin-bottom: 14px;
+            }
+
+            /* Premium vertical timeline graph */
+            .timeline {
+                position: relative;
+                padding-left: 20px;
+                border-left: 2px solid var(--border);
+                margin-left: 8px;
             }
 
             .timeline-item {
+                position: relative;
                 grid-template-columns: 1fr;
-                gap: 6px;
+                gap: 4px;
+                border-bottom: none;
+                padding-bottom: 20px;
+            }
+
+            .timeline-item:last-child {
+                padding-bottom: 0;
+            }
+
+            .timeline-item::before {
+                content: '';
+                position: absolute;
+                left: -26px;
+                top: 5px;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background-color: var(--accent);
+                border: 2px solid var(--surface);
+                box-shadow: 0 0 0 2px rgba(196, 164, 124, 0.2);
             }
 
             .timeline-year {
-                font-size: 0.86rem;
+                font-size: 0.88rem;
             }
 
+            /* Horizontal Scrollable Gallery on Mobile */
             .story-gallery {
-                grid-template-columns: 1fr;
+                display: flex;
+                gap: 16px;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                scrollbar-width: none;
+                -webkit-overflow-scrolling: touch;
+                margin: 18px -18px 0 -18px;
+                padding: 0 18px;
+                grid-template-columns: none; /* remove grid layout */
+            }
+
+            .story-gallery::-webkit-scrollbar {
+                display: none;
+            }
+
+            .story-gallery figure {
+                flex: 0 0 85%;
+                scroll-snap-align: center;
+                margin: 0;
             }
 
             .story-gallery img {
-                height: 210px;
+                height: 200px;
+                width: 100%;
+                object-fit: cover;
             }
 
             .story-actions {
                 flex-direction: column;
+                gap: 10px;
             }
 
             .story-actions .btn-primary,
             .story-actions .btn-secondary {
                 width: 100%;
+                min-height: 48px;
             }
         }
     </style>
@@ -324,18 +382,57 @@
     <!-- Mobile Navigation Drawer -->
     <div class="mobile-drawer" id="mobile-drawer">
         <div class="drawer-header">
-            <span class="logo-text">Die Brucke</span>
+            <div class="logo">
+                <span class="logo-text">DIE BRÜCKE</span>
+                <span class="logo-sub">Atelier</span>
+            </div>
             <button class="close-drawer" id="close-drawer-btn" aria-label="Cerrar menú">
                 <i data-lucide="x"></i>
             </button>
         </div>
         <nav class="drawer-links">
-            <a href="index.html#inicio" onclick="toggleDrawer()">Inicio</a>
-            <a href="index.html#catalogo" onclick="toggleDrawer()">Catálogo</a>
-            <a href="index.html#galeria" onclick="toggleDrawer()">Estudio</a>
-            <a href="index.html#contact-form-section" onclick="toggleDrawer()">Contacto</a>
-            <a href="index.html#magdalena" onclick="toggleDrawer()">Sobre Mí</a>
-            <a href="https://www.instagram.com/reel/DYF0lQhBTTI/?igsh=MTljczVhd3huMmJheg==" target="_blank" rel="noopener noreferrer">Videos IG</a>
+            <a href="index.html#inicio" onclick="toggleDrawer()">
+                <i data-lucide="home"></i>
+                <div class="link-text">
+                    <span class="link-title">Inicio</span>
+                    <span class="link-sub">Portada principal</span>
+                </div>
+            </a>
+            <a href="index.html#catalogo" onclick="toggleDrawer()">
+                <i data-lucide="book-open"></i>
+                <div class="link-text">
+                    <span class="link-title">Catálogo</span>
+                    <span class="link-sub">Recursos creativos</span>
+                </div>
+            </a>
+            <a href="index.html#galeria" onclick="toggleDrawer()">
+                <i data-lucide="pen-tool"></i>
+                <div class="link-text">
+                    <span class="link-title">Estudio</span>
+                    <span class="link-sub">Estética y procesos</span>
+                </div>
+            </a>
+            <a href="index.html#contact-form-section" onclick="toggleDrawer()">
+                <i data-lucide="mail"></i>
+                <div class="link-text">
+                    <span class="link-title">Contacto</span>
+                    <span class="link-sub">Consultas y encargos</span>
+                </div>
+            </a>
+            <a href="index.html#magdalena" onclick="toggleDrawer()">
+                <i data-lucide="user"></i>
+                <div class="link-text">
+                    <span class="link-title">Sobre Mí</span>
+                    <span class="link-sub">Filosofía e historia</span>
+                </div>
+            </a>
+            <a href="https://www.instagram.com/reel/DYF0lQhBTTI/?igsh=MTljczVhd3huMmJheg==" target="_blank" rel="noopener noreferrer">
+                <i data-lucide="instagram"></i>
+                <div class="link-text">
+                    <span class="link-title">Videos IG</span>
+                    <span class="link-sub">Inspiración en video</span>
+                </div>
+            </a>
         </nav>
         <div class="drawer-footer">
             <button id="theme-toggle-mobile" class="theme-toggle-btn-mobile">

@@ -58,18 +58,57 @@
     <!-- Mobile Navigation Drawer -->
     <div class="mobile-drawer" id="mobile-drawer">
         <div class="drawer-header">
-            <span class="logo-text">Die Brucke</span>
+            <div class="logo">
+                <span class="logo-text">DIE BRÜCKE</span>
+                <span class="logo-sub">Atelier</span>
+            </div>
             <button class="close-drawer" id="close-drawer-btn" aria-label="Cerrar menú">
                 <i data-lucide="x"></i>
             </button>
         </div>
         <nav class="drawer-links">
-            <a href="#inicio" onclick="toggleDrawer()">Inicio</a>
-            <a href="#catalogo" onclick="toggleDrawer()">Catálogo</a>
-            <a href="#galeria" onclick="toggleDrawer()">Estudio</a>
-            <a href="#contact-form-section" onclick="toggleDrawer()">Contacto</a>
-            <a href="#magdalena" onclick="toggleDrawer()">Sobre Mí</a>
-            <a href="https://www.instagram.com/reel/DYF0lQhBTTI/?igsh=MTljczVhd3huMmJheg==" target="_blank" rel="noopener noreferrer">Videos IG</a>
+            <a href="#inicio" onclick="toggleDrawer()">
+                <i data-lucide="home"></i>
+                <div class="link-text">
+                    <span class="link-title">Inicio</span>
+                    <span class="link-sub">Portada principal</span>
+                </div>
+            </a>
+            <a href="#catalogo" onclick="toggleDrawer()">
+                <i data-lucide="book-open"></i>
+                <div class="link-text">
+                    <span class="link-title">Catálogo</span>
+                    <span class="link-sub">Recursos creativos</span>
+                </div>
+            </a>
+            <a href="#galeria" onclick="toggleDrawer()">
+                <i data-lucide="pen-tool"></i>
+                <div class="link-text">
+                    <span class="link-title">Estudio</span>
+                    <span class="link-sub">Estética y procesos</span>
+                </div>
+            </a>
+            <a href="#contact-form-section" onclick="toggleDrawer()">
+                <i data-lucide="mail"></i>
+                <div class="link-text">
+                    <span class="link-title">Contacto</span>
+                    <span class="link-sub">Consultas y encargos</span>
+                </div>
+            </a>
+            <a href="#magdalena" onclick="toggleDrawer()">
+                <i data-lucide="user"></i>
+                <div class="link-text">
+                    <span class="link-title">Sobre Mí</span>
+                    <span class="link-sub">Filosofía e historia</span>
+                </div>
+            </a>
+            <a href="https://www.instagram.com/reel/DYF0lQhBTTI/?igsh=MTljczVhd3huMmJheg==" target="_blank" rel="noopener noreferrer">
+                <i data-lucide="instagram"></i>
+                <div class="link-text">
+                    <span class="link-title">Videos IG</span>
+                    <span class="link-sub">Inspiración en video</span>
+                </div>
+            </a>
         </nav>
         <div class="drawer-footer">
             <button id="theme-toggle-mobile" class="theme-toggle-btn-mobile">
