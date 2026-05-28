@@ -26,7 +26,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: 'Invalid or missing amount' });
     }
 
-    const referer = req.headers.referer || '';
+    const referer = req.headers.referer || (req.headers.host ? `https://${req.headers.host}` : 'https://diebrucke.studio');
 
     try {
         const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
