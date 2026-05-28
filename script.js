@@ -1034,6 +1034,18 @@ function initDownloadModal() {
                 document.getElementById('download-modal-form-container').style.display = 'block';
                 document.getElementById('download-modal-donation-container').style.display = 'none';
                 document.getElementById('download-modal-success-container').style.display = 'none';
+
+                // Reset success icon circle to default check state
+                const successCircle = document.querySelector('#download-modal-success-container .success-icon-circle');
+                if (successCircle) {
+                    successCircle.innerHTML = '<i data-lucide="check"></i>';
+                    successCircle.style.borderColor = '';
+                    successCircle.style.backgroundColor = '';
+                }
+                const titleEl = document.getElementById('download-modal-title');
+                if (titleEl) {
+                    titleEl.textContent = 'Descarga Gratuita';
+                }
             }
         }, 300);
         form.reset();
@@ -1097,12 +1109,17 @@ function initDownloadModal() {
         });
 
         if (activeProductPrice > 0) {
+            // Save state in localStorage to retrieve upon redirect back
+            localStorage.setItem('pending_download_name', name);
+            localStorage.setItem('pending_download_prod_name', activeProductName);
+            localStorage.setItem('pending_download_url', activeDownloadUrl);
+            localStorage.setItem('pending_download_filename', activeDownloadFilename);
+
             // Disable submit button during payment processing
             const submitBtn = document.getElementById('download-modal-submit-btn');
             const submitText = document.getElementById('download-modal-submit-text');
-            const originalText = submitText ? submitText.textContent : 'Confirmar';
             if (submitBtn) submitBtn.disabled = true;
-            if (submitText) submitText.textContent = 'Procesando...';
+            if (submitText) submitText.textContent = 'Redirigiendo a Mercado Pago...';
 
             try {
                 // Call the Vercel serverless function endpoint to create preference
@@ -1123,25 +1140,21 @@ function initDownloadModal() {
 
                 const data = await response.json();
                 
-                // Open Mercado Pago checkout in a new window/tab
+                // Redirect current window to Mercado Pago checkout
                 if (data.init_point) {
-                    window.open(data.init_point, '_blank');
+                    window.location.href = data.init_point;
                 } else {
                     console.error('No init_point returned', data);
+                    alert('No se pudo iniciar el pago. Por favor, intenta de nuevo.');
+                    if (submitBtn) submitBtn.disabled = false;
+                    if (submitText) submitText.textContent = 'Proceder al Pago';
                 }
 
             } catch (error) {
                 console.error('Error initiating payment:', error);
-                alert('Hubo un inconveniente al conectar con Mercado Pago. Intentando iniciar la descarga de todos modos.');
-            } finally {
-                // Restore button state
+                alert('Hubo un inconveniente al conectar con Mercado Pago. Por favor, intenta de nuevo.');
                 if (submitBtn) submitBtn.disabled = false;
-                if (submitText) submitText.textContent = originalText;
-
-                // Download the file anyway
-                triggerDownload();
-                // Show final success screen
-                showSuccessState(name);
+                if (submitText) submitText.textContent = 'Proceder al Pago';
             }
         } else {
             // Hide form and show donation panel for free products
@@ -1218,6 +1231,99 @@ function initDownloadModal() {
             }
         });
     });
+
+    // Check payment status from URL redirect
+    function checkPaymentStatus() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status') || urlParams.get('collection_status');
+        
+        if (status) {
+            // Retrieve product details from localStorage or fallback to page button
+            const savedName = localStorage.getItem('pending_download_name') || 'Cliente';
+            let savedProdName = localStorage.getItem('pending_download_prod_name');
+            let savedUrl = localStorage.getItem('pending_download_url');
+            let savedFilename = localStorage.getItem('pending_download_filename');
+
+            // Fallback if localStorage was cleared or not set
+            if (!savedUrl) {
+                const firstBtn = document.querySelector('.product-actions .btn-primary');
+                if (firstBtn) {
+                    savedProdName = firstBtn.getAttribute('data-product-name') || document.title.split('|')[0].trim();
+                    savedUrl = firstBtn.getAttribute('href');
+                    savedFilename = firstBtn.getAttribute('download') || 'recurso.pdf';
+                }
+            }
+
+            activeProductName = savedProdName || 'Recurso';
+            activeDownloadUrl = savedUrl;
+            activeDownloadFilename = savedFilename;
+
+            if (status === 'approved') {
+                // Trigger download
+                if (activeDownloadUrl) {
+                    triggerDownload();
+                }
+                // Show success modal
+                showSuccessState(savedName);
+                
+                // Clean up query params from URL so reloading doesn't trigger download again
+                const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+                
+                // Clear localStorage
+                localStorage.removeItem('pending_download_name');
+                localStorage.removeItem('pending_download_prod_name');
+                localStorage.removeItem('pending_download_url');
+                localStorage.removeItem('pending_download_filename');
+            } else if (status === 'pending') {
+                // Show pending state in modal
+                document.getElementById('download-modal-form-container').style.display = 'none';
+                document.getElementById('download-modal-donation-container').style.display = 'none';
+                document.getElementById('download-success-message').innerHTML = `¡Gracias, <strong>${savedName}</strong>!<br>Tu pago de <strong>"${activeProductName}"</strong> está pendiente de acreditación. La descarga comenzará automáticamente una vez acreditado.`;
+                document.getElementById('download-modal-success-container').style.display = 'block';
+                
+                const titleEl = document.getElementById('download-modal-title');
+                if (titleEl) titleEl.textContent = 'Pago Pendiente';
+                
+                modal.style.display = 'flex';
+                modal.classList.add('open');
+                document.body.style.overflow = 'hidden';
+
+                // Clean up query params
+                const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+            } else if (status === 'failure') {
+                // Show error state in modal
+                document.getElementById('download-modal-form-container').style.display = 'none';
+                document.getElementById('download-modal-donation-container').style.display = 'none';
+                document.getElementById('download-success-message').innerHTML = `El pago para <strong>"${activeProductName}"</strong> no pudo completarse. Por favor, intentá realizar la operación nuevamente.`;
+                document.getElementById('download-modal-success-container').style.display = 'block';
+                
+                const titleEl = document.getElementById('download-modal-title');
+                if (titleEl) titleEl.textContent = 'Pago Rechazado';
+                
+                // Change check icon to an error icon
+                const successCircle = document.querySelector('#download-modal-success-container .success-icon-circle');
+                if (successCircle) {
+                    successCircle.innerHTML = '<i data-lucide="alert-circle" style="color: #e53e3e;"></i>';
+                    successCircle.style.borderColor = '#e53e3e';
+                    successCircle.style.backgroundColor = 'rgba(229, 62, 62, 0.08)';
+                }
+                
+                modal.style.display = 'flex';
+                modal.classList.add('open');
+                document.body.style.overflow = 'hidden';
+                lucide.createIcons();
+
+                // Clean up query params
+                const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+            }
+        }
+    }
+
+    // Run check on initialization
+    checkPaymentStatus();
 }
 
 /* ==========================================================================
