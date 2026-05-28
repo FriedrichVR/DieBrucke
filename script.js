@@ -894,7 +894,7 @@ function initDownloadModal() {
                         <div class="modal-header">
                             <div>
                                 <span class="download-modal-brand">Die Brücke Atelier</span>
-                                <h3 style="margin-top: 4px;">Descarga Gratuita</h3>
+                                <h3 style="margin-top: 4px;" id="download-modal-title">Descarga Gratuita</h3>
                             </div>
                             <button class="close-modal" id="close-download-modal" aria-label="Cerrar modal">
                                 <i data-lucide="x"></i>
@@ -919,11 +919,11 @@ function initDownloadModal() {
                                         <input type="email" id="download-email" required placeholder="ejemplo@correo.com">
                                         <i data-lucide="mail"></i>
                                     </div>
-                                    <span class="help-text">El archivo PDF se descargará automáticamente al confirmar.</span>
+                                    <span class="help-text" id="download-modal-help-text">El archivo PDF se descargará automáticamente al confirmar.</span>
                                 </div>
-                                <button type="submit" class="btn-primary w-full" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                    <span>Confirmar y Descargar</span>
-                                    <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                                <button type="submit" id="download-modal-submit-btn" class="btn-primary w-full" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    <span id="download-modal-submit-text">Confirmar y Descargar</span>
+                                    <i id="download-modal-submit-icon" data-lucide="download" style="width: 16px; height: 16px;"></i>
                                 </button>
                             </form>
                             <div class="download-modal-footer">
@@ -985,13 +985,39 @@ function initDownloadModal() {
     let activeDownloadUrl = '';
     let activeDownloadFilename = '';
     let activeProductName = '';
+    let activeProductPrice = 0;
 
-    function openModal(prodName, url, filename) {
+    function openModal(prodName, url, filename, price = 0) {
         activeProductName = prodName;
         activeDownloadUrl = url;
         activeDownloadFilename = filename;
+        activeProductPrice = price;
 
         modalProdName.textContent = prodName;
+
+        // Dynamically update form content based on whether it is paid or free
+        const titleEl = document.getElementById('download-modal-title');
+        const helpTextEl = document.getElementById('download-modal-help-text');
+        const submitBtnTextEl = document.getElementById('download-modal-submit-text');
+        const submitBtnIconEl = document.getElementById('download-modal-submit-icon');
+
+        if (activeProductPrice > 0) {
+            if (titleEl) titleEl.textContent = 'Adquirir Recurso';
+            if (helpTextEl) helpTextEl.textContent = `Serás redirigido a Mercado Pago para realizar el pago de $${activeProductPrice.toLocaleString('es-AR')}.`;
+            if (submitBtnTextEl) submitBtnTextEl.textContent = `Proceder al Pago ($${activeProductPrice.toLocaleString('es-AR')})`;
+            if (submitBtnIconEl) {
+                submitBtnIconEl.setAttribute('data-lucide', 'credit-card');
+            }
+        } else {
+            if (titleEl) titleEl.textContent = 'Descarga Gratuita';
+            if (helpTextEl) helpTextEl.textContent = 'El archivo PDF se descargará automáticamente al confirmar.';
+            if (submitBtnTextEl) submitBtnTextEl.textContent = 'Confirmar y Descargar';
+            if (submitBtnIconEl) {
+                submitBtnIconEl.setAttribute('data-lucide', 'download');
+            }
+        }
+        lucide.createIcons();
+
         modal.style.display = 'flex';
         modal.offsetHeight; // Reflow
         modal.classList.add('open');
@@ -1028,7 +1054,8 @@ function initDownloadModal() {
                 e.preventDefault();
                 const prodName = btn.getAttribute('data-product-name') || document.title.split('|')[0].trim();
                 const filename = btn.getAttribute('download') || 'recurso.pdf';
-                openModal(prodName, href, filename);
+                const price = Number(btn.getAttribute('data-product-price')) || 0;
+                openModal(prodName, href, filename, price);
             }
         });
     });
@@ -1052,7 +1079,7 @@ function initDownloadModal() {
         lucide.createIcons();
     }
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('download-name').value.trim();
         const email = document.getElementById('download-email').value.trim();
@@ -1069,10 +1096,59 @@ function initDownloadModal() {
             source: 'download_modal'
         });
 
-        // Hide form and show donation panel
-        document.getElementById('download-modal-form-container').style.display = 'none';
-        document.getElementById('download-modal-donation-container').style.display = 'block';
-        lucide.createIcons(); // Render heart icon
+        if (activeProductPrice > 0) {
+            // Disable submit button during payment processing
+            const submitBtn = document.getElementById('download-modal-submit-btn');
+            const submitText = document.getElementById('download-modal-submit-text');
+            const originalText = submitText ? submitText.textContent : 'Confirmar';
+            if (submitBtn) submitBtn.disabled = true;
+            if (submitText) submitText.textContent = 'Procesando...';
+
+            try {
+                // Call the Vercel serverless function endpoint to create preference
+                const response = await fetch('/api/create-preference', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: Number(activeProductPrice),
+                        title: `Pago - ${activeProductName}`
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('API error creating preference');
+                }
+
+                const data = await response.json();
+                
+                // Open Mercado Pago checkout in a new window/tab
+                if (data.init_point) {
+                    window.open(data.init_point, '_blank');
+                } else {
+                    console.error('No init_point returned', data);
+                }
+
+            } catch (error) {
+                console.error('Error initiating payment:', error);
+                alert('Hubo un inconveniente al conectar con Mercado Pago. Intentando iniciar la descarga de todos modos.');
+            } finally {
+                // Restore button state
+                if (submitBtn) submitBtn.disabled = false;
+                if (submitText) submitText.textContent = originalText;
+
+                // Download the file anyway
+                triggerDownload();
+                // Show final success screen
+                showSuccessState(name);
+            }
+        } else {
+            // Hide form and show donation panel for free products
+            document.getElementById('download-modal-form-container').style.display = 'none';
+            document.getElementById('download-modal-donation-container').style.display = 'block';
+            lucide.createIcons(); // Render heart icon
+        }
     });
 
     // Handle Skip Donation (Free download)
