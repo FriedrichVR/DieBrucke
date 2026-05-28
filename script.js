@@ -1135,7 +1135,9 @@ function initDownloadModal() {
                 });
 
                 if (!response.ok) {
-                    throw new Error('API error creating preference');
+                    const errData = await response.json().catch(() => ({}));
+                    console.error('API error details:', errData);
+                    throw new Error(errData.message || 'API error creating preference');
                 }
 
                 const data = await response.json();
@@ -1203,7 +1205,9 @@ function initDownloadModal() {
                 });
 
                 if (!response.ok) {
-                    throw new Error('API error creating preference');
+                    const errData = await response.json().catch(() => ({}));
+                    console.error('API error details:', errData);
+                    throw new Error(errData.message || 'API error creating preference');
                 }
 
                 const data = await response.json();
@@ -1543,7 +1547,9 @@ function initCoffeeButton() {
                 });
 
                 if (!response.ok) {
-                    throw new Error('API error creating preference');
+                    const errData = await response.json().catch(() => ({}));
+                    console.error('API error details:', errData);
+                    throw new Error(errData.message || 'API error creating preference');
                 }
 
                 const data = await response.json();
