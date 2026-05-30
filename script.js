@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Story Carousel
     initStoryCarousel();
 
+    // Initialize Hero Carousel
+    initHeroCarousel();
+
     // Initialize Download Lead Modal
     initDownloadModal();
 
@@ -712,6 +715,94 @@ function initStoryCarousel() {
         resetAutoSlide();
     }, () => {
         showSlide(currentSlide - 1);
+        resetAutoSlide();
+    });
+
+    startAutoSlide();
+}
+
+/* ==========================================================================
+   8.6. Hero Carousel
+   ========================================================================== */
+function initHeroCarousel() {
+    const carousel = document.querySelector('.hero-carousel');
+    if (!carousel) return;
+
+    const slides = carousel.querySelectorAll('.hero-carousel-slides img');
+    const prevBtn = carousel.querySelector('.hero-carousel-btn.prev');
+    const nextBtn = carousel.querySelector('.hero-carousel-btn.next');
+    const dots = carousel.querySelectorAll('.hero-carousel-dots .hero-dot');
+    
+    if (slides.length === 0) return;
+
+    let currentIdx = 0;
+    let autoSlideInterval;
+
+    function showSlide(idx) {
+        if (idx < 0) {
+            currentIdx = slides.length - 1;
+        } else if (idx >= slides.length) {
+            currentIdx = 0;
+        } else {
+            currentIdx = idx;
+        }
+
+        slides.forEach((slide, i) => {
+            slide.classList.toggle('active', i === currentIdx);
+        });
+
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentIdx);
+        });
+    }
+
+    function nextSlide() {
+        showSlide(currentIdx + 1);
+    }
+
+    function prevSlide() {
+        showSlide(currentIdx - 1);
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            prevSlide();
+            resetAutoSlide();
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            nextSlide();
+            resetAutoSlide();
+        });
+    }
+
+    dots.forEach((dot, dotIdx) => {
+        dot.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSlide(dotIdx);
+            resetAutoSlide();
+        });
+    });
+
+    function startAutoSlide() {
+        autoSlideInterval = setInterval(nextSlide, 5000);
+    }
+
+    function resetAutoSlide() {
+        clearInterval(autoSlideInterval);
+        startAutoSlide();
+    }
+
+    // Touch Swipe Support for mobile
+    addSwipeSupport(carousel, () => {
+        nextSlide();
+        resetAutoSlide();
+    }, () => {
+        prevSlide();
         resetAutoSlide();
     });
 
