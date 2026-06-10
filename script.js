@@ -1201,16 +1201,18 @@ function initDownloadModal() {
 
         if (!name || !email) return;
 
-        // Send lead info to n8n in the background
+        // Send lead info to n8n in the background (only for free products on form submit)
         const isPurchase = activeProductPrice > 0;
-        sendToN8N({
-            name: name,
-            email: email,
-            productName: activeProductName,
-            downloadUrl: activeDownloadUrl,
-            filename: activeDownloadFilename,
-            source: 'download_modal'
-        }, isPurchase);
+        if (!isPurchase) {
+            sendToN8N({
+                name: name,
+                email: email,
+                productName: activeProductName,
+                downloadUrl: activeDownloadUrl,
+                filename: activeDownloadFilename,
+                source: 'download_modal'
+            }, false);
+        }
 
         if (activeProductPrice > 0) {
             // Save state in localStorage to retrieve upon redirect back
