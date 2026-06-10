@@ -823,7 +823,10 @@ function initHeroCarousel() {
    ========================================================================== */
 function initDownloadModal() {
     const downloadBtns = document.querySelectorAll('.product-actions .btn-primary');
-    if (downloadBtns.length === 0) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasStatus = urlParams.has('status') || urlParams.has('collection_status');
+
+    if (downloadBtns.length === 0 && !hasStatus) return;
 
     // Inject modal HTML if not already in document
     if (!document.getElementById('download-modal')) {
@@ -1393,6 +1396,12 @@ function initDownloadModal() {
                 }
                 // Show success modal
                 showSuccessState(savedName);
+
+                // Open the modal overlay visually
+                modal.style.display = 'flex';
+                modal.offsetHeight; // Reflow
+                modal.classList.add('open');
+                document.body.style.overflow = 'hidden';
                 
                 // Clean up query params from URL so reloading doesn't trigger download again
                 const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
