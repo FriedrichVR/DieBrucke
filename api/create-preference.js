@@ -31,6 +31,7 @@ export default async function handler(req, res) {
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     
     // Set notification_url to point to our Serverless Function api/payment-webhook
+    const isProduction = host === 'diebrucke.studio' || host === 'www.diebrucke.studio' || referer.includes('diebrucke.studio');
     const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
     const notificationUrl = isLocal
         ? 'https://diebrucke.studio/api/payment-webhook' // Fallback to a live endpoint so it doesn't fail MP's validation
@@ -68,7 +69,8 @@ export default async function handler(req, res) {
                     payer_name: name || undefined,
                     payer_email: email || undefined,
                     download_url: downloadUrl || undefined,
-                    filename: filename || undefined
+                    filename: filename || undefined,
+                    environment: isProduction ? 'production' : 'test'
                 }
             })
         });

@@ -61,9 +61,9 @@ export default async function handler(req, res) {
             const downloadUrl = metadata.download_url || '';
             const filename = metadata.filename || '';
 
-            // Determinar si es entorno de testing o producción según el dominio de la petición
-            const host = req.headers.host || '';
-            const isProduction = host.includes('diebrucke.studio');
+            // Determinar si es entorno de testing o producción según el metadato del pago
+            const environment = metadata.environment || 'production';
+            const isProduction = environment === 'production';
             const n8nWebhookUrl = isProduction
                 ? 'https://n8n.srv1202174.hstgr.cloud/webhook/65debfa2-2837-4f6b-8052-093144fcc2d8'
                 : 'https://n8n.srv1202174.hstgr.cloud/webhook-test/65debfa2-2837-4f6b-8052-093144fcc2d8';
@@ -85,7 +85,7 @@ export default async function handler(req, res) {
                     status: payment.status,
                     source: 'payment_success',
                     submittedAt: new Date().toISOString(),
-                    environment: isProduction ? 'production' : 'test'
+                    environment: environment
                 })
             });
 
