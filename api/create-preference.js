@@ -70,7 +70,8 @@ export default async function handler(req, res) {
                     payer_email: email || undefined,
                     download_url: downloadUrl || undefined,
                     filename: filename || undefined,
-                    environment: isProduction ? 'production' : 'test'
+                    environment: isProduction ? 'production' : 'test',
+                    page_url: referer
                 }
             })
         });

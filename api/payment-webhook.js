@@ -57,9 +57,14 @@ export default async function handler(req, res) {
 
             const clientEmail = metadata.payer_email || payer.email || '';
             const clientName = metadata.payer_name || (payer.first_name ? `${payer.first_name} ${payer.last_name || ''}` : 'Cliente');
-            const productName = metadata.product_name || 'Recurso';
+            
+            // Limpiar prefijo "Pago - " o "Contribución voluntaria - " para que coincida con el nombre limpio de la web
+            let productName = metadata.product_name || 'Recurso';
+            productName = productName.replace(/^(Pago - |Contribución voluntaria - )/, '');
+            
             const downloadUrl = metadata.download_url || '';
             const filename = metadata.filename || '';
+            const pageUrl = metadata.page_url || '';
 
             // Determinar si es entorno de testing o producción según el metadato del pago
             const environment = metadata.environment || 'production';
@@ -85,7 +90,8 @@ export default async function handler(req, res) {
                     status: payment.status,
                     source: 'payment_success',
                     submittedAt: new Date().toISOString(),
-                    environment: environment
+                    environment: environment,
+                    pageUrl: pageUrl
                 })
             });
 
