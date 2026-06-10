@@ -20,13 +20,18 @@ export default async function handler(req, res) {
         return res.status(405).json({ message: 'Method not allowed' });
     }
 
-    const { amount, title } = req.body;
+    const { amount, title, email, name } = req.body;
 
     if (!amount || isNaN(amount) || amount <= 0) {
         return res.status(400).json({ message: 'Invalid or missing amount' });
     }
 
     const referer = req.headers.referer || (req.headers.host ? `https://${req.headers.host}` : 'https://diebrucke.studio');
+    const host = req.headers.host || '';
+    const isProduction = host === 'diebrucke.studio' || host === 'www.diebrucke.studio' || referer.includes('diebrucke.studio');
+    const webhookUrl = isProduction
+        ? 'https://n8n.srv1202174.hstgr.cloud/webhook/65debfa2-2837-4f6b-8052-093144fcc2d8'
+        : 'https://n8n.srv1202174.hstgr.cloud/webhook-test/65debfa2-2837-4f6b-8052-093144fcc2d8';
 
     try {
         const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
@@ -44,12 +49,22 @@ export default async function handler(req, res) {
                         currency_id: 'ARS'
                     }
                 ],
+                payer: email ? {
+                    email: email,
+                    name: name || undefined
+                } : undefined,
                 back_urls: {
                     success: referer,
                     pending: referer,
                     failure: referer
                 },
-                auto_return: 'approved'
+                auto_return: 'approved',
+                notification_url: webhookUrl,
+                metadata: {
+                    product_name: title || 'Contribución voluntaria',
+                    payer_name: name || undefined,
+                    payer_email: email || undefined
+                }
             })
         });
 

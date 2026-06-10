@@ -1235,7 +1235,9 @@ function initDownloadModal() {
                     },
                     body: JSON.stringify({
                         amount: Number(activeProductPrice),
-                        title: `Pago - ${activeProductName}`
+                        title: `Pago - ${activeProductName}`,
+                        email: email,
+                        name: name
                     })
                 });
 
@@ -1297,6 +1299,9 @@ function initDownloadModal() {
             if (skipBtn) skipBtn.disabled = true;
 
             try {
+                const emailInput = document.getElementById('download-email');
+                const email = emailInput ? emailInput.value.trim() : '';
+
                 // Call the Vercel serverless function endpoint to create preference
                 const response = await fetch('/api/create-preference', {
                     method: 'POST',
@@ -1305,7 +1310,9 @@ function initDownloadModal() {
                     },
                     body: JSON.stringify({
                         amount: Number(amount),
-                        title: `Contribución voluntaria - ${activeProductName}`
+                        title: `Contribución voluntaria - ${activeProductName}`,
+                        email: email,
+                        name: name
                     })
                 });
 
