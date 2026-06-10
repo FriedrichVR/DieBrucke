@@ -521,7 +521,13 @@ function sendToN8N(data, isPurchase = false) {
             ...data,
             submittedAt: new Date().toISOString(),
             environment: isLocal ? 'test' : 'production',
-            pageUrl: window.location.href
+            pageUrl: (() => {
+                let url = window.location.origin + window.location.pathname;
+                if (!url.endsWith('.html') && (url.endsWith('/product-3') || url.endsWith('/product-8'))) {
+                    url = url + '.html';
+                }
+                return url;
+            })()
         })
     })
     .then(response => {
