@@ -1212,6 +1212,7 @@ function initDownloadModal() {
         if (activeProductPrice > 0) {
             // Save state in localStorage to retrieve upon redirect back
             localStorage.setItem('pending_download_name', name);
+            localStorage.setItem('pending_download_email', email);
             localStorage.setItem('pending_download_prod_name', activeProductName);
             localStorage.setItem('pending_download_url', activeDownloadUrl);
             localStorage.setItem('pending_download_filename', activeDownloadFilename);
@@ -1315,6 +1316,14 @@ function initDownloadModal() {
                 
                 // Open Mercado Pago checkout in a new window/tab
                 if (data.init_point) {
+                    // Save state in localStorage to retrieve upon redirect back
+                    localStorage.setItem('pending_download_name', name);
+                    const emailInput = document.getElementById('download-email');
+                    localStorage.setItem('pending_download_email', emailInput ? emailInput.value.trim() : '');
+                    localStorage.setItem('pending_download_prod_name', `Donación (${activeProductName}) - $${amount}`);
+                    localStorage.setItem('pending_download_url', activeDownloadUrl);
+                    localStorage.setItem('pending_download_filename', activeDownloadFilename);
+
                     window.open(data.init_point, '_blank');
                 } else {
                     console.error('No init_point returned', data);
@@ -1345,6 +1354,7 @@ function initDownloadModal() {
         if (status) {
             // Retrieve product details from localStorage or fallback to page button
             const savedName = localStorage.getItem('pending_download_name') || 'Cliente';
+            const savedEmail = localStorage.getItem('pending_download_email') || '';
             let savedProdName = localStorage.getItem('pending_download_prod_name');
             let savedUrl = localStorage.getItem('pending_download_url');
             let savedFilename = localStorage.getItem('pending_download_filename');
@@ -1364,6 +1374,19 @@ function initDownloadModal() {
             activeDownloadFilename = savedFilename;
 
             if (status === 'approved') {
+                // Call webhook with payment details
+                sendToN8N({
+                    name: savedName,
+                    email: savedEmail,
+                    productName: activeProductName,
+                    downloadUrl: activeDownloadUrl,
+                    filename: activeDownloadFilename,
+                    paymentId: urlParams.get('payment_id') || urlParams.get('collection_id') || '',
+                    preferenceId: urlParams.get('preference_id') || '',
+                    status: status,
+                    source: 'payment_success'
+                }, true);
+
                 // Trigger download
                 if (activeDownloadUrl) {
                     triggerDownload();
@@ -1377,10 +1400,24 @@ function initDownloadModal() {
                 
                 // Clear localStorage
                 localStorage.removeItem('pending_download_name');
+                localStorage.removeItem('pending_download_email');
                 localStorage.removeItem('pending_download_prod_name');
                 localStorage.removeItem('pending_download_url');
                 localStorage.removeItem('pending_download_filename');
             } else if (status === 'pending') {
+                // Call webhook with pending payment details
+                sendToN8N({
+                    name: savedName,
+                    email: savedEmail,
+                    productName: activeProductName,
+                    downloadUrl: activeDownloadUrl,
+                    filename: activeDownloadFilename,
+                    paymentId: urlParams.get('payment_id') || urlParams.get('collection_id') || '',
+                    preferenceId: urlParams.get('preference_id') || '',
+                    status: status,
+                    source: 'payment_pending'
+                }, true);
+
                 // Show pending state in modal
                 document.getElementById('download-modal-form-container').style.display = 'none';
                 document.getElementById('download-modal-donation-container').style.display = 'none';
@@ -1397,7 +1434,27 @@ function initDownloadModal() {
                 // Clean up query params
                 const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
                 window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+
+                // Clear localStorage
+                localStorage.removeItem('pending_download_name');
+                localStorage.removeItem('pending_download_email');
+                localStorage.removeItem('pending_download_prod_name');
+                localStorage.removeItem('pending_download_url');
+                localStorage.removeItem('pending_download_filename');
             } else if (status === 'failure') {
+                // Call webhook with failure payment details
+                sendToN8N({
+                    name: savedName,
+                    email: savedEmail,
+                    productName: activeProductName,
+                    downloadUrl: activeDownloadUrl,
+                    filename: activeDownloadFilename,
+                    paymentId: urlParams.get('payment_id') || urlParams.get('collection_id') || '',
+                    preferenceId: urlParams.get('preference_id') || '',
+                    status: status,
+                    source: 'payment_failure'
+                }, true);
+
                 // Show error state in modal
                 document.getElementById('download-modal-form-container').style.display = 'none';
                 document.getElementById('download-modal-donation-container').style.display = 'none';
@@ -1423,6 +1480,13 @@ function initDownloadModal() {
                 // Clean up query params
                 const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
                 window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+
+                // Clear localStorage
+                localStorage.removeItem('pending_download_name');
+                localStorage.removeItem('pending_download_email');
+                localStorage.removeItem('pending_download_prod_name');
+                localStorage.removeItem('pending_download_url');
+                localStorage.removeItem('pending_download_filename');
             }
         }
     }
@@ -1655,6 +1719,13 @@ function initCoffeeButton() {
 
                 const data = await response.json();
                 if (data.init_point) {
+                    // Save state in localStorage to retrieve upon redirect back
+                    localStorage.setItem('pending_download_name', 'Donante Cafecito');
+                    localStorage.setItem('pending_download_email', '');
+                    localStorage.setItem('pending_download_prod_name', `Cafecito ☕ ($${amountVal})`);
+                    localStorage.setItem('pending_download_url', '');
+                    localStorage.setItem('pending_download_filename', '');
+
                     window.open(data.init_point, '_blank');
                     closeModal();
                 } else {
