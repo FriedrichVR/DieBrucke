@@ -1,0 +1,104 @@
+// api/payment-webhook.js
+// Función Serverless para recibir notificaciones de pago (webhooks) de Mercado Pago
+
+export default async function handler(req, res) {
+    // Manejar CORS de forma segura
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    );
+
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
+    }
+
+    if (req.method !== 'POST') {
+        return res.status(405).json({ message: 'Method not allowed' });
+    }
+
+    // Mercado Pago envía la notificación en el cuerpo (body) de la petición
+    // El objeto contiene: action, api_version, data, date_created, id, live_mode, type, user_id
+    const { action, type, data } = req.body;
+
+    const paymentId = data?.id || req.query.id;
+    const topic = type || req.query.topic;
+
+    // Solo procesamos si el tipo de notificación es "payment"
+    if (!paymentId || (topic !== 'payment' && req.query.topic !== 'payment')) {
+        // Retornamos 200 a Mercado Pago para confirmar recepción de otros eventos (ej. merchant_order)
+        return res.status(200).json({ message: 'Notification received but not a payment' });
+    }
+
+    try {
+        // Consultar los detalles del pago en Mercado Pago usando el ID recibido
+        const mpResponse = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${process.env.MP_ACCESS_TOKEN}`
+            }
+        });
+
+        if (!mpResponse.ok) {
+            const errorText = await mpResponse.text();
+            console.error('Error al consultar pago en Mercado Pago:', errorText);
+            return res.status(500).json({ message: 'Error fetching payment details from Mercado Pago' });
+        }
+
+        const payment = await mpResponse.json();
+
+        // Solo enviamos a n8n si el pago ha sido aprobado/acreditado
+        if (payment.status === 'approved') {
+            const metadata = payment.metadata || {};
+            const payer = payment.payer || {};
+
+            const clientEmail = metadata.payer_email || payer.email || '';
+            const clientName = metadata.payer_name || (payer.first_name ? `${payer.first_name} ${payer.last_name || ''}` : 'Cliente');
+            const productName = metadata.product_name || 'Recurso';
+            const downloadUrl = metadata.download_url || '';
+            const filename = metadata.filename || '';
+
+            // Determinar si es entorno de testing o producción según el dominio de la petición
+            const host = req.headers.host || '';
+            const isProduction = host.includes('diebrucke.studio');
+            const n8nWebhookUrl = isProduction
+                ? 'https://n8n.srv1202174.hstgr.cloud/webhook/65debfa2-2837-4f6b-8052-093144fcc2d8'
+                : 'https://n8n.srv1202174.hstgr.cloud/webhook-test/65debfa2-2837-4f6b-8052-093144fcc2d8';
+
+            console.log(`Pago ${paymentId} aprobado. Enviando webhook a n8n (${isProduction ? 'Producción' : 'Testing'})...`);
+
+            const n8nResponse = await fetch(n8nWebhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: clientName,
+                    email: clientEmail,
+                    productName: productName,
+                    downloadUrl: downloadUrl,
+                    filename: filename,
+                    paymentId: paymentId,
+                    status: payment.status,
+                    source: 'payment_success',
+                    submittedAt: new Date().toISOString(),
+                    environment: isProduction ? 'production' : 'test'
+                })
+            });
+
+            if (!n8nResponse.ok) {
+                const n8nError = await n8nResponse.text();
+                console.error('Error al enviar webhook a n8n:', n8nError);
+                return res.status(500).json({ message: 'Error sending webhook to n8n' });
+            }
+        }
+
+        return res.status(200).json({ message: 'Notification processed successfully' });
+    } catch (error) {
+        console.error('Error en el controlador del webhook:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}

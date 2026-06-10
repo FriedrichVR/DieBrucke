@@ -20,7 +20,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ message: 'Method not allowed' });
     }
 
-    const { amount, title, email, name } = req.body;
+    const { amount, title, email, name, downloadUrl, filename } = req.body;
 
     if (!amount || isNaN(amount) || amount <= 0) {
         return res.status(400).json({ message: 'Invalid or missing amount' });
@@ -28,10 +28,13 @@ export default async function handler(req, res) {
 
     const referer = req.headers.referer || (req.headers.host ? `https://${req.headers.host}` : 'https://diebrucke.studio');
     const host = req.headers.host || '';
-    const isProduction = host === 'diebrucke.studio' || host === 'www.diebrucke.studio' || referer.includes('diebrucke.studio');
-    const webhookUrl = isProduction
-        ? 'https://n8n.srv1202174.hstgr.cloud/webhook/65debfa2-2837-4f6b-8052-093144fcc2d8'
-        : 'https://n8n.srv1202174.hstgr.cloud/webhook-test/65debfa2-2837-4f6b-8052-093144fcc2d8';
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    
+    // Set notification_url to point to our Serverless Function api/payment-webhook
+    const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
+    const notificationUrl = isLocal
+        ? 'https://diebrucke.studio/api/payment-webhook' // Fallback to a live endpoint so it doesn't fail MP's validation
+        : `${protocol}://${host}/api/payment-webhook`;
 
     try {
         const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
@@ -59,11 +62,13 @@ export default async function handler(req, res) {
                     failure: referer
                 },
                 auto_return: 'approved',
-                notification_url: webhookUrl,
+                notification_url: notificationUrl,
                 metadata: {
                     product_name: title || 'Contribución voluntaria',
                     payer_name: name || undefined,
-                    payer_email: email || undefined
+                    payer_email: email || undefined,
+                    download_url: downloadUrl || undefined,
+                    filename: filename || undefined
                 }
             })
         });

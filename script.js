@@ -1239,7 +1239,9 @@ function initDownloadModal() {
                         amount: Number(activeProductPrice),
                         title: `Pago - ${activeProductName}`,
                         email: email,
-                        name: name
+                        name: name,
+                        downloadUrl: activeDownloadUrl,
+                        filename: activeDownloadFilename
                     })
                 });
 
@@ -1314,7 +1316,9 @@ function initDownloadModal() {
                         amount: Number(amount),
                         title: `Contribución voluntaria - ${activeProductName}`,
                         email: email,
-                        name: name
+                        name: name,
+                        downloadUrl: activeDownloadUrl,
+                        filename: activeDownloadFilename
                     })
                 });
 
