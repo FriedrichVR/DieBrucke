@@ -497,11 +497,20 @@ function handleNewsletterSubmit(event) {
 /* ==========================================================================
    n8n Webhook Integration
    ========================================================================== */
-function sendToN8N(data) {
+function sendToN8N(data, isPurchase = false) {
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const webhookUrl = isLocal 
+    
+    // Purchases webhook URLs (product-3.html & product-8.html)
+    const purchasesWebhookUrl = isLocal
         ? 'https://n8n.srv1202174.hstgr.cloud/webhook-test/65debfa2-2837-4f6b-8052-093144fcc2d8'
         : 'https://n8n.srv1202174.hstgr.cloud/webhook/65debfa2-2837-4f6b-8052-093144fcc2d8';
+        
+    // Free downloads webhook URLs
+    const freeDownloadsWebhookUrl = isLocal
+        ? 'https://n8n.srv1202174.hstgr.cloud/webhook-test/65debfa2-2837-4f6b-8052-093144fcc2d8'
+        : 'https://n8n.srv1202174.hstgr.cloud/webhook/65debfa2-2837-4f6b-8052-093144fcc2d8';
+
+    const webhookUrl = isPurchase ? purchasesWebhookUrl : freeDownloadsWebhookUrl;
 
     fetch(webhookUrl, {
         method: 'POST',
@@ -1190,6 +1199,7 @@ function initDownloadModal() {
         if (!name || !email) return;
 
         // Send lead info to n8n in the background
+        const isPurchase = activeProductPrice > 0;
         sendToN8N({
             name: name,
             email: email,
@@ -1197,7 +1207,7 @@ function initDownloadModal() {
             downloadUrl: activeDownloadUrl,
             filename: activeDownloadFilename,
             source: 'download_modal'
-        });
+        }, isPurchase);
 
         if (activeProductPrice > 0) {
             // Save state in localStorage to retrieve upon redirect back
