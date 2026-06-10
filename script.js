@@ -507,8 +507,8 @@ function sendToN8N(data, isPurchase = false) {
         
     // Free downloads webhook URLs
     const freeDownloadsWebhookUrl = isLocal
-        ? 'https://n8n.srv1202174.hstgr.cloud/webhook-test/65debfa2-2837-4f6b-8052-093144fcc2d8'
-        : 'https://n8n.srv1202174.hstgr.cloud/webhook/65debfa2-2837-4f6b-8052-093144fcc2d8';
+        ? 'https://n8n.srv1202174.hstgr.cloud/webhook-test/5b5a033b-6e72-489d-9bc7-2f80fdc86d56'
+        : 'https://n8n.srv1202174.hstgr.cloud/webhook/5b5a033b-6e72-489d-9bc7-2f80fdc86d56';
 
     const webhookUrl = isPurchase ? purchasesWebhookUrl : freeDownloadsWebhookUrl;
 
