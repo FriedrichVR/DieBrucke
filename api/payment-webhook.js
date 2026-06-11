@@ -54,18 +54,36 @@ export default async function handler(req, res) {
         if (payment.status === 'approved') {
             const metadata = payment.metadata || {};
             const payer = payment.payer || {};
-
-            const clientEmail = metadata.payer_email || payer.email || '';
-            const clientName = metadata.payer_name || (payer.first_name ? `${payer.first_name} ${payer.last_name || ''}` : 'Cliente');
             
+            // Decodificar el respaldo de seguridad de external_reference en caso de que metadata sea null/vacío
+            const extRef = payment.external_reference || '';
+            let refEmail = '', refName = '', refFilename = '', refDownloadUrl = '', refPageUrl = '';
+            if (extRef && extRef.includes('|')) {
+                const parts = extRef.split('|');
+                refEmail = parts[0];
+                refName = parts[1];
+                refFilename = parts[2];
+                refDownloadUrl = parts[3];
+                refPageUrl = parts[4];
+            }
+ 
+            // Obtener datos del cliente priorizando metadata, luego external_reference y finalmente datos de la cuenta de MP
+            const clientEmail = metadata.payer_email || refEmail || payer.email || '';
+            const clientName = metadata.payer_name || refName || (payer.first_name ? `${payer.first_name} ${payer.last_name || ''}`.trim() : 'Cliente');
+            
+            // Obtener el nombre del producto
+            let productName = metadata.product_name;
+            if (!productName) {
+                const items = payment.additional_info?.items || [];
+                productName = items[0]?.title || 'Recurso';
+            }
             // Limpiar prefijo "Pago - " o "Contribución voluntaria - " para que coincida con el nombre limpio de la web
-            let productName = metadata.product_name || 'Recurso';
             productName = productName.replace(/^(Pago - |Contribución voluntaria - )/, '');
             
-            const downloadUrl = metadata.download_url || '';
-            const filename = metadata.filename || '';
+            const downloadUrl = metadata.download_url || refDownloadUrl || '';
+            const filename = metadata.filename || refFilename || '';
             
-            let pageUrl = metadata.page_url || '';
+            let pageUrl = metadata.page_url || refPageUrl || '';
             // Limpiar parámetros de búsqueda de la URL si los hubiera
             if (pageUrl.includes('?')) {
                 pageUrl = pageUrl.split('?')[0];

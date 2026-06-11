@@ -64,6 +64,13 @@ export default async function handler(req, res) {
                 },
                 auto_return: 'approved',
                 notification_url: notificationUrl,
+                external_reference: [
+                    email || '',
+                    name || '',
+                    filename || '',
+                    downloadUrl || '',
+                    referer || ''
+                ].join('|'),
                 metadata: {
                     product_name: title || 'Contribución voluntaria',
                     payer_name: name || undefined,
