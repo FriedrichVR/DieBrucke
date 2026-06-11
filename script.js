@@ -1396,18 +1396,20 @@ function initDownloadModal() {
             activeDownloadFilename = savedFilename;
 
             if (status === 'approved') {
-                // Call webhook with payment details
-                sendToN8N({
-                    name: savedName,
-                    email: savedEmail,
-                    productName: activeProductName,
-                    downloadUrl: activeDownloadUrl,
-                    filename: activeDownloadFilename,
-                    paymentId: urlParams.get('payment_id') || urlParams.get('collection_id') || '',
-                    preferenceId: urlParams.get('preference_id') || '',
-                    status: status,
-                    source: 'payment_success'
-                }, true);
+                // Call webhook with payment details (only if email is available)
+                if (savedEmail) {
+                    sendToN8N({
+                        name: savedName,
+                        email: savedEmail,
+                        productName: activeProductName,
+                        downloadUrl: activeDownloadUrl,
+                        filename: activeDownloadFilename,
+                        paymentId: urlParams.get('payment_id') || urlParams.get('collection_id') || '',
+                        preferenceId: urlParams.get('preference_id') || '',
+                        status: status,
+                        source: 'payment_success'
+                    }, true);
+                }
 
                 // Trigger download
                 if (activeDownloadUrl) {
@@ -1433,18 +1435,20 @@ function initDownloadModal() {
                 localStorage.removeItem('pending_download_url');
                 localStorage.removeItem('pending_download_filename');
             } else if (status === 'pending') {
-                // Call webhook with pending payment details
-                sendToN8N({
-                    name: savedName,
-                    email: savedEmail,
-                    productName: activeProductName,
-                    downloadUrl: activeDownloadUrl,
-                    filename: activeDownloadFilename,
-                    paymentId: urlParams.get('payment_id') || urlParams.get('collection_id') || '',
-                    preferenceId: urlParams.get('preference_id') || '',
-                    status: status,
-                    source: 'payment_pending'
-                }, true);
+                // Call webhook with pending payment details (only if email is available)
+                if (savedEmail) {
+                    sendToN8N({
+                        name: savedName,
+                        email: savedEmail,
+                        productName: activeProductName,
+                        downloadUrl: activeDownloadUrl,
+                        filename: activeDownloadFilename,
+                        paymentId: urlParams.get('payment_id') || urlParams.get('collection_id') || '',
+                        preferenceId: urlParams.get('preference_id') || '',
+                        status: status,
+                        source: 'payment_pending'
+                    }, true);
+                }
 
                 // Show pending state in modal
                 document.getElementById('download-modal-form-container').style.display = 'none';
@@ -1470,18 +1474,20 @@ function initDownloadModal() {
                 localStorage.removeItem('pending_download_url');
                 localStorage.removeItem('pending_download_filename');
             } else if (status === 'failure') {
-                // Call webhook with failure payment details
-                sendToN8N({
-                    name: savedName,
-                    email: savedEmail,
-                    productName: activeProductName,
-                    downloadUrl: activeDownloadUrl,
-                    filename: activeDownloadFilename,
-                    paymentId: urlParams.get('payment_id') || urlParams.get('collection_id') || '',
-                    preferenceId: urlParams.get('preference_id') || '',
-                    status: status,
-                    source: 'payment_failure'
-                }, true);
+                // Call webhook with failure payment details (only if email is available)
+                if (savedEmail) {
+                    sendToN8N({
+                        name: savedName,
+                        email: savedEmail,
+                        productName: activeProductName,
+                        downloadUrl: activeDownloadUrl,
+                        filename: activeDownloadFilename,
+                        paymentId: urlParams.get('payment_id') || urlParams.get('collection_id') || '',
+                        preferenceId: urlParams.get('preference_id') || '',
+                        status: status,
+                        source: 'payment_failure'
+                    }, true);
+                }
 
                 // Show error state in modal
                 document.getElementById('download-modal-form-container').style.display = 'none';
