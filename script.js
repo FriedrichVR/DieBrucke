@@ -1396,20 +1396,8 @@ function initDownloadModal() {
             activeDownloadFilename = savedFilename;
 
             if (status === 'approved') {
-                // Call webhook with payment details (only if email is available)
-                if (savedEmail) {
-                    sendToN8N({
-                        name: savedName,
-                        email: savedEmail,
-                        productName: activeProductName,
-                        downloadUrl: activeDownloadUrl,
-                        filename: activeDownloadFilename,
-                        paymentId: urlParams.get('payment_id') || urlParams.get('collection_id') || '',
-                        preferenceId: urlParams.get('preference_id') || '',
-                        status: status,
-                        source: 'payment_success'
-                    }, true);
-                }
+                // El webhook se envía de forma segura desde el backend (api/payment-webhook.js) para evitar duplicados.
+                // Ya no llamamos a sendToN8N desde el frontend para compras aprobadas.
 
                 // Trigger download
                 if (activeDownloadUrl) {

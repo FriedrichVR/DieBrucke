@@ -1,6 +1,9 @@
 // api/payment-webhook.js
 // Función Serverless para recibir notificaciones de pago (webhooks) de Mercado Pago
 
+// Cache global en memoria para evitar el procesamiento redundante de notificaciones duplicadas
+const processedPayments = new Set();
+
 export default async function handler(req, res) {
     // Manejar CORS de forma segura
     res.setHeader('Access-Control-Allow-Credentials', true);
@@ -52,6 +55,10 @@ export default async function handler(req, res) {
 
         // Solo enviamos a n8n si el pago ha sido aprobado/acreditado
         if (payment.status === 'approved') {
+            if (processedPayments.has(paymentId)) {
+                console.log(`[Deduplicación] El pago ${paymentId} ya fue procesado por esta instancia. Omitiendo.`);
+                return res.status(200).json({ message: 'Notification already processed' });
+            }
             const metadata = payment.metadata || {};
             const payer = payment.payer || {};
             
@@ -127,6 +134,12 @@ export default async function handler(req, res) {
                 console.error('Error al enviar webhook a n8n:', n8nError);
                 return res.status(500).json({ message: 'Error sending webhook to n8n' });
             }
+
+            // Registrar en caché de deduplicación tras el éxito de n8n
+            processedPayments.add(paymentId);
+            setTimeout(() => {
+                processedPayments.delete(paymentId);
+            }, 60000); // Expirar después de 1 minuto
         }
 
         return res.status(200).json({ message: 'Notification processed successfully' });
