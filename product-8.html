@@ -175,6 +175,36 @@
             letter-spacing: 0.06em;
         }
 
+        .btn-instagram-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+            color: #ffffff !important;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.82rem;
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 12px rgba(253, 29, 29, 0.2);
+            margin-left: auto;
+            align-self: center;
+        }
+
+        .btn-instagram-inline:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(253, 29, 29, 0.35);
+            opacity: 0.95;
+        }
+
+        .btn-instagram-inline svg {
+            width: 14px;
+            height: 14px;
+            stroke-width: 2.5;
+        }
+
         .quick-benefits {
             display: flex;
             gap: 8px;
@@ -317,6 +347,12 @@
                 justify-content: space-between;
                 align-items: center;
                 margin-bottom: 14px;
+                gap: 8px;
+            }
+
+            .btn-instagram-inline {
+                padding: 6px 10px;
+                font-size: 0.75rem;
             }
 
             .media-badge {
@@ -502,6 +538,10 @@
                     <div class="price-row">
                         <p class="product-price">3500 ARS</p>
                         <span class="price-note">Tiempo Limitado</span>
+                        <a href="https://www.instagram.com/reel/DZYNAJihEFF/?igsh=dnRqcGdwcnh2YnEw" target="_blank" rel="noopener noreferrer" class="btn-instagram-inline" title="Ver Reel en Instagram">
+                            <i data-lucide="instagram"></i>
+                            <span>Ver Reel</span>
+                        </a>
                     </div>
 
                     <div class="quick-benefits">

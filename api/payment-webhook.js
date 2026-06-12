@@ -36,6 +36,16 @@ export default async function handler(req, res) {
         return res.status(200).json({ message: 'Notification received but not a payment' });
     }
 
+    // 1. Lock preventivo: Evita condiciones de carrera concurrentes locales en el mismo contenedor
+    if (processedPayments.has(paymentId)) {
+        console.log(`[Deduplicación] El pago ${paymentId} ya está siendo procesado o ya fue procesado por esta instancia. Omitiendo.`);
+        return res.status(200).json({ message: 'Notification already processed (locked)' });
+    }
+
+    // Adquirir bloqueo temporal antes del fetch asíncrono
+    processedPayments.add(paymentId);
+    console.log(`[Deduplicación] Adquiriendo bloqueo para el pago ${paymentId}.`);
+
     try {
         // Consultar los detalles del pago en Mercado Pago usando el ID recibido
         const mpResponse = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
@@ -48,113 +58,112 @@ export default async function handler(req, res) {
         if (!mpResponse.ok) {
             const errorText = await mpResponse.text();
             console.error('Error al consultar pago en Mercado Pago:', errorText);
+            // Liberar el bloqueo si falla la consulta para permitir futuros reintentos
+            processedPayments.delete(paymentId);
             return res.status(500).json({ message: 'Error fetching payment details from Mercado Pago' });
         }
 
         const payment = await mpResponse.json();
 
-        // Solo enviamos a n8n si el pago ha sido aprobado/acreditado
-        if (payment.status === 'approved') {
-            if (processedPayments.has(paymentId)) {
-                console.log(`[Deduplicación] El pago ${paymentId} ya está siendo procesado o ya fue procesado por esta instancia. Omitiendo.`);
-                return res.status(200).json({ message: 'Notification already processed' });
-            }
+        // 2. Liberar el bloqueo si el pago NO está aprobado (ej. pendiente, rechazado)
+        // Esto permite que cuando el pago finalmente se apruebe, la nueva notificación pueda procesarse.
+        if (payment.status !== 'approved') {
+            console.log(`[Deduplicación] El pago ${paymentId} tiene estado ${payment.status} (no aprobado). Liberando bloqueo.`);
+            processedPayments.delete(paymentId);
+            return res.status(200).json({ message: `Notification processed, status is ${payment.status}` });
+        }
 
-            // Marcar inmediatamente para evitar condiciones de carrera por peticiones concurrentes
-            processedPayments.add(paymentId);
-            console.log(`[Deduplicación] Registrando pago ${paymentId} en proceso.`);
+        // Si el pago está aprobado, mantenemos el bloqueo para ignorar segundas notificaciones.
+        // Configuramos un temporizador de 5 minutos para limpiar la caché y no saturar la memoria.
+        const cleanupTimeout = setTimeout(() => {
+            processedPayments.delete(paymentId);
+            console.log(`[Deduplicación] Bloqueo para el pago ${paymentId} removido de la caché tras expiración (5 min).`);
+        }, 300000);
 
-            // Configurar el temporizador para expirar de la caché en 1 minuto
-            const cleanupTimeout = setTimeout(() => {
-                processedPayments.delete(paymentId);
-                console.log(`[Deduplicación] Pago ${paymentId} removido de la caché de deduplicación.`);
-            }, 60000);
+        const metadata = payment.metadata || {};
+        const payer = payment.payer || {};
+        
+        // Decodificar el respaldo de seguridad de external_reference en caso de que metadata sea null/vacío
+        const extRef = payment.external_reference || '';
+        let refEmail = '', refName = '', refFilename = '', refDownloadUrl = '', refPageUrl = '';
+        if (extRef && extRef.includes('|')) {
+            const parts = extRef.split('|');
+            refEmail = parts[0];
+            refName = parts[1];
+            refFilename = parts[2];
+            refDownloadUrl = parts[3];
+            refPageUrl = parts[4];
+        }
 
-            const metadata = payment.metadata || {};
-            const payer = payment.payer || {};
-            
-            // Decodificar el respaldo de seguridad de external_reference en caso de que metadata sea null/vacío
-            const extRef = payment.external_reference || '';
-            let refEmail = '', refName = '', refFilename = '', refDownloadUrl = '', refPageUrl = '';
-            if (extRef && extRef.includes('|')) {
-                const parts = extRef.split('|');
-                refEmail = parts[0];
-                refName = parts[1];
-                refFilename = parts[2];
-                refDownloadUrl = parts[3];
-                refPageUrl = parts[4];
-            }
- 
-            // Obtener datos del cliente priorizando metadata, luego external_reference y finalmente datos de la cuenta de MP
-            const clientEmail = metadata.payer_email || refEmail || payer.email || '';
-            const clientName = metadata.payer_name || refName || (payer.first_name ? `${payer.first_name} ${payer.last_name || ''}`.trim() : 'Cliente');
-            
-            // Obtener el nombre del producto
-            let productName = metadata.product_name;
-            if (!productName) {
-                const items = payment.additional_info?.items || [];
-                productName = items[0]?.title || 'Recurso';
-            }
-            // Limpiar prefijo "Pago - " o "Contribución voluntaria - " para que coincida con el nombre limpio de la web
-            productName = productName.replace(/^(Pago - |Contribución voluntaria - )/, '');
-            
-            const downloadUrl = metadata.download_url || refDownloadUrl || '';
-            const filename = metadata.filename || refFilename || '';
-            
-            let pageUrl = metadata.page_url || refPageUrl || '';
-            // Limpiar parámetros de búsqueda de la URL si los hubiera
-            if (pageUrl.includes('?')) {
-                pageUrl = pageUrl.split('?')[0];
-            }
-            // Forzar extensión .html si se omitió por URLs limpias (ej. /product-3 -> /product-3.html)
-            if (!pageUrl.endsWith('.html') && (pageUrl.endsWith('/product-3') || pageUrl.endsWith('/product-8'))) {
-                pageUrl = pageUrl + '.html';
-            }
+        // Obtener datos del cliente priorizando metadata, luego external_reference y finalmente datos de la cuenta de MP
+        const clientEmail = metadata.payer_email || refEmail || payer.email || '';
+        const clientName = metadata.payer_name || refName || (payer.first_name ? `${payer.first_name} ${payer.last_name || ''}`.trim() : 'Cliente');
+        
+        // Obtener el nombre del producto
+        let productName = metadata.product_name;
+        if (!productName) {
+            const items = payment.additional_info?.items || [];
+            productName = items[0]?.title || 'Recurso';
+        }
+        // Limpiar prefijo "Pago - " o "Contribución voluntaria - " para que coincida con el nombre limpio de la web
+        productName = productName.replace(/^(Pago - |Contribución voluntaria - )/, '');
+        
+        const downloadUrl = metadata.download_url || refDownloadUrl || '';
+        const filename = metadata.filename || refFilename || '';
+        
+        let pageUrl = metadata.page_url || refPageUrl || '';
+        // Limpiar parámetros de búsqueda de la URL si los hubiera
+        if (pageUrl.includes('?')) {
+            pageUrl = pageUrl.split('?')[0];
+        }
+        // Forzar extensión .html si se omitió por URLs limpias (ej. /product-3 -> /product-3.html)
+        if (!pageUrl.endsWith('.html') && (pageUrl.endsWith('/product-3') || pageUrl.endsWith('/product-8'))) {
+            pageUrl = pageUrl + '.html';
+        }
 
-            // Determinar si es entorno de testing o producción según el metadato del pago
-            const environment = metadata.environment || 'production';
-            const isProduction = environment === 'production';
-            const n8nWebhookUrl = isProduction
-                ? 'https://n8n.srv1202174.hstgr.cloud/webhook/65debfa2-2837-4f6b-8052-093144fcc2d8'
-                : 'https://n8n.srv1202174.hstgr.cloud/webhook-test/65debfa2-2837-4f6b-8052-093144fcc2d8';
+        // Determinar si es entorno de testing o producción según el metadato del pago
+        const environment = metadata.environment || 'production';
+        const isProduction = environment === 'production';
+        const n8nWebhookUrl = isProduction
+            ? 'https://n8n.srv1202174.hstgr.cloud/webhook/65debfa2-2837-4f6b-8052-093144fcc2d8'
+            : 'https://n8n.srv1202174.hstgr.cloud/webhook-test/65debfa2-2837-4f6b-8052-093144fcc2d8';
 
-            console.log(`Pago ${paymentId} aprobado. Enviando webhook a n8n (${isProduction ? 'Producción' : 'Testing'})...`);
+        console.log(`Pago ${paymentId} aprobado. Enviando webhook a n8n (${isProduction ? 'Producción' : 'Testing'})...`);
 
-            try {
-                const n8nResponse = await fetch(n8nWebhookUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name: clientName,
-                        email: clientEmail,
-                        productName: productName,
-                        downloadUrl: downloadUrl,
-                        filename: filename,
-                        paymentId: paymentId,
-                        status: payment.status,
-                        source: 'payment_success',
-                        submittedAt: new Date().toISOString(),
-                        environment: environment,
-                        pageUrl: pageUrl
-                    })
-                });
+        try {
+            const n8nResponse = await fetch(n8nWebhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: clientName,
+                    email: clientEmail,
+                    productName: productName,
+                    downloadUrl: downloadUrl,
+                    filename: filename,
+                    paymentId: paymentId,
+                    status: payment.status,
+                    source: 'payment_success',
+                    submittedAt: new Date().toISOString(),
+                    environment: environment,
+                    pageUrl: pageUrl
+                })
+            });
 
-                if (!n8nResponse.ok) {
-                    const n8nError = await n8nResponse.text();
-                    console.error('Error al enviar webhook a n8n:', n8nError);
-                    // Si falla, removemos de la caché para permitir reintentos
-                    processedPayments.delete(paymentId);
-                    clearTimeout(cleanupTimeout);
-                    return res.status(500).json({ message: 'Error sending webhook to n8n' });
-                }
-            } catch (n8nFetchError) {
-                console.error('Excepción al enviar webhook a n8n:', n8nFetchError);
+            if (!n8nResponse.ok) {
+                const n8nError = await n8nResponse.text();
+                console.error('Error al enviar webhook a n8n:', n8nError);
+                // Si falla, removemos de la caché para permitir reintentos
                 processedPayments.delete(paymentId);
                 clearTimeout(cleanupTimeout);
                 return res.status(500).json({ message: 'Error sending webhook to n8n' });
             }
+        } catch (n8nFetchError) {
+            console.error('Excepción al enviar webhook a n8n:', n8nFetchError);
+            processedPayments.delete(paymentId);
+            clearTimeout(cleanupTimeout);
+            return res.status(500).json({ message: 'Error sending webhook to n8n' });
         }
 
         return res.status(200).json({ message: 'Notification processed successfully' });
