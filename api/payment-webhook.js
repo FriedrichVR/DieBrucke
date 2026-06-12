@@ -56,9 +56,20 @@ export default async function handler(req, res) {
         // Solo enviamos a n8n si el pago ha sido aprobado/acreditado
         if (payment.status === 'approved') {
             if (processedPayments.has(paymentId)) {
-                console.log(`[Deduplicación] El pago ${paymentId} ya fue procesado por esta instancia. Omitiendo.`);
+                console.log(`[Deduplicación] El pago ${paymentId} ya está siendo procesado o ya fue procesado por esta instancia. Omitiendo.`);
                 return res.status(200).json({ message: 'Notification already processed' });
             }
+
+            // Marcar inmediatamente para evitar condiciones de carrera por peticiones concurrentes
+            processedPayments.add(paymentId);
+            console.log(`[Deduplicación] Registrando pago ${paymentId} en proceso.`);
+
+            // Configurar el temporizador para expirar de la caché en 1 minuto
+            const cleanupTimeout = setTimeout(() => {
+                processedPayments.delete(paymentId);
+                console.log(`[Deduplicación] Pago ${paymentId} removido de la caché de deduplicación.`);
+            }, 60000);
+
             const metadata = payment.metadata || {};
             const payer = payment.payer || {};
             
@@ -109,42 +120,49 @@ export default async function handler(req, res) {
 
             console.log(`Pago ${paymentId} aprobado. Enviando webhook a n8n (${isProduction ? 'Producción' : 'Testing'})...`);
 
-            const n8nResponse = await fetch(n8nWebhookUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    name: clientName,
-                    email: clientEmail,
-                    productName: productName,
-                    downloadUrl: downloadUrl,
-                    filename: filename,
-                    paymentId: paymentId,
-                    status: payment.status,
-                    source: 'payment_success',
-                    submittedAt: new Date().toISOString(),
-                    environment: environment,
-                    pageUrl: pageUrl
-                })
-            });
+            try {
+                const n8nResponse = await fetch(n8nWebhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: clientName,
+                        email: clientEmail,
+                        productName: productName,
+                        downloadUrl: downloadUrl,
+                        filename: filename,
+                        paymentId: paymentId,
+                        status: payment.status,
+                        source: 'payment_success',
+                        submittedAt: new Date().toISOString(),
+                        environment: environment,
+                        pageUrl: pageUrl
+                    })
+                });
 
-            if (!n8nResponse.ok) {
-                const n8nError = await n8nResponse.text();
-                console.error('Error al enviar webhook a n8n:', n8nError);
+                if (!n8nResponse.ok) {
+                    const n8nError = await n8nResponse.text();
+                    console.error('Error al enviar webhook a n8n:', n8nError);
+                    // Si falla, removemos de la caché para permitir reintentos
+                    processedPayments.delete(paymentId);
+                    clearTimeout(cleanupTimeout);
+                    return res.status(500).json({ message: 'Error sending webhook to n8n' });
+                }
+            } catch (n8nFetchError) {
+                console.error('Excepción al enviar webhook a n8n:', n8nFetchError);
+                processedPayments.delete(paymentId);
+                clearTimeout(cleanupTimeout);
                 return res.status(500).json({ message: 'Error sending webhook to n8n' });
             }
-
-            // Registrar en caché de deduplicación tras el éxito de n8n
-            processedPayments.add(paymentId);
-            setTimeout(() => {
-                processedPayments.delete(paymentId);
-            }, 60000); // Expirar después de 1 minuto
         }
 
         return res.status(200).json({ message: 'Notification processed successfully' });
     } catch (error) {
         console.error('Error en el controlador del webhook:', error);
+        if (paymentId) {
+            processedPayments.delete(paymentId);
+        }
         return res.status(500).json({ message: 'Internal server error' });
     }
 }
