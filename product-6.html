@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <!-- Lucide Icons CDN -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
     <style>
         .product-detail {
             position: relative;
@@ -351,6 +351,7 @@
             }
         }
     </style>
+    <link rel="preload" as="image" href="images/card6/1.jpg" fetchpriority="high">
 </head>
 <body class="light-mode">
     <!-- Navigation Header -->
@@ -464,10 +465,10 @@
             <article class="product-media">            
                 <div class="product-carousel">
                     <div class="product-carousel-slides">
-                        <img src="images/card6/1.jpg" alt="Producto 6 - Vista 1" class="active">
-                        <img src="images/card6/2.jpg" alt="Producto 6 - Vista 2">
-                        <img src="images/card6/3.jpg" alt="Producto 6 - Vista 3">
-                        <img src="images/card6/4.jpg" alt="Producto 6 - Vista 4">
+                        <img fetchpriority="high" decoding="async" src="images/card6/1.jpg" alt="Producto 6 - Vista 1" class="active">
+                        <img loading="lazy" decoding="async" src="images/card6/2.jpg" alt="Producto 6 - Vista 2">
+                        <img loading="lazy" decoding="async" src="images/card6/3.jpg" alt="Producto 6 - Vista 3">
+                        <img loading="lazy" decoding="async" src="images/card6/4.jpg" alt="Producto 6 - Vista 4">
                     </div>
                     <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                         <i data-lucide="chevron-left"></i>

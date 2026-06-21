@@ -13,7 +13,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <!-- Lucide Icons CDN -->
-    <script defer src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
     <style>
         .product-detail {
             position: relative;
@@ -392,6 +392,7 @@
             }
         }
     </style>
+    <link rel="preload" as="image" href="images/card14/1.jpg" fetchpriority="high">
 </head>
 
 <body class="light-mode">
@@ -506,7 +507,7 @@
                 <article class="product-media">
                     <div class="product-carousel">
                         <div class="product-carousel-slides">
-                            <img loading="lazy" decoding="async" src="images/card14/1.jpg" alt="Producto 14 - Vista 1" class="active">
+                            <img fetchpriority="high" decoding="async" src="images/card14/1.jpg" alt="Producto 14 - Vista 1" class="active">
                             <img loading="lazy" decoding="async" src="images/card14/2.jpg" alt="Producto 14 - Vista 2">
                             <img loading="lazy" decoding="async" src="images/card14/3.jpg" alt="Producto 14 - Vista 3">
                             <img loading="lazy" decoding="async" src="images/card14/4.jpg" alt="Producto 14 - Vista 4">

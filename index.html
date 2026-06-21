@@ -16,7 +16,8 @@
     <!-- CSS Stylesheet -->
     <link rel="stylesheet" href="styles.css">
     <!-- Lucide Icons CDN -->
-    <script defer src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+        <link rel="preload" as="image" href="images/hero/hero1.jpg" fetchpriority="high">
 </head>
 
 <body class="light-mode">
@@ -149,10 +150,10 @@
                     <div class="floating-blueprint-card">
                         <div class="blueprint-preview hero-carousel">
                             <div class="hero-carousel-slides">
-                                <img src="images/hero/hero1.jpg"  alt="Portada Atelier - Vista 1" class="active">
-                                <img src="images/hero/hero2.jpg"  alt="Escarapelas Ilustradas - Vista 2">
-                                <img src="images/hero/hero3.jpg"  alt="E-Book - Vista 3">
-                                <img src="images/hero/hero4.jpg"  alt="Bitácora Mundialista - Vista 4">
+                                <img fetchpriority="high" decoding="async" src="images/hero/hero1.jpg" alt="Portada Atelier - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/hero/hero2.jpg" alt="Escarapelas Ilustradas - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/hero/hero3.jpg" alt="E-Book - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/hero/hero4.jpg" alt="Bitácora Mundialista - Vista 4">
                             </div>
                             <button class="hero-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -225,10 +226,10 @@
                         <div class="product-carousel">
                             <a href="product-16.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 16">
-                                <img src="images/card16/1.jpg" alt="NOA - Vista 1" class="active">
-                                <img src="images/card16/2.jpg" alt="NOA - Vista 2">
-                                <img src="images/card16/3.jpg" alt="NOA - Vista 3">
-                                <img src="images/card16/4.jpg" alt="NOA - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/card16/1.jpg" alt="NOA - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/card16/2.jpg" alt="NOA - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/card16/3.jpg" alt="NOA - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/card16/4.jpg" alt="NOA - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -265,10 +266,10 @@
                         <div class="product-carousel">
                             <a href="product-15.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 15">
-                                <img src="images/card15/1.jpg" alt="Cuyo - Vista 1" class="active">
-                                <img src="images/card15/2.jpg" alt="Cuyo - Vista 2">
-                                <img src="images/card15/3.jpg" alt="Cuyo - Vista 3">
-                                <img src="images/card15/4.jpg" alt="Cuyo - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/card15/1.jpg" alt="Cuyo - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/card15/2.jpg" alt="Cuyo - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/card15/3.jpg" alt="Cuyo - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/card15/4.jpg" alt="Cuyo - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -305,10 +306,10 @@
                         <div class="product-carousel">
                             <a href="product-14.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 12">
-                                <img src="images/card14/1.jpg" alt="Litoral - Vista 1" class="active">
-                                <img src="images/card14/2.jpg" alt="Litoral - Vista 2">
-                                <img src="images/card14/3.jpg" alt="Litoral - Vista 3">
-                                <img src="images/card14/4.jpg" alt="Litoral - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/card14/1.jpg" alt="Litoral - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/card14/2.jpg" alt="Litoral - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/card14/3.jpg" alt="Litoral - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/card14/4.jpg" alt="Litoral - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -345,10 +346,10 @@
                         <div class="product-carousel">
                             <a href="product-13.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 12">
-                                <img src="images/card13/1.jpg" alt="Patagonia - Vista 1" class="active">
-                                <img src="images/card13/2.jpg" alt="Patagonia - Vista 2">
-                                <img src="images/card13/3.jpg" alt="Patagonia - Vista 3">
-                                <img src="images/card13/4.jpg" alt="Patagonia - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/card13/1.jpg" alt="Patagonia - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/card13/2.jpg" alt="Patagonia - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/card13/3.jpg" alt="Patagonia - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/card13/4.jpg" alt="Patagonia - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -385,10 +386,10 @@
                         <div class="product-carousel">
                             <a href="product-12.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 12">
-                                <img src="images/card12/1.jpg" alt="Antartida - Vista 1" class="active">
-                                <img src="images/card12/2.jpg" alt="Antartida - Vista 2">
-                                <img src="images/card12/3.jpg" alt="Antartida - Vista 3">
-                                <img src="images/card12/4.jpg" alt="Antartida - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/card12/1.jpg" alt="Antartida - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/card12/2.jpg" alt="Antartida - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/card12/3.jpg" alt="Antartida - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/card12/4.jpg" alt="Antartida - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -426,10 +427,10 @@
                         <div class="product-carousel">
                             <a href="product-11.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 11">
-                                <img src="images/card11/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
-                                <img src="images/card11/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
-                                <img src="images/card11/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
-                                <img src="images/card11/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/card11/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/card11/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/card11/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/card11/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -466,10 +467,10 @@
                         <div class="product-carousel">
                             <a href="product-10.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 10">
-                                <img src="images/card10/1.jpg" alt="Estampillas Argentinas - Vista 1" class="active">
-                                <img src="images/card10/2.jpg" alt="Estampillas Argentinas - Vista 2">
-                                <img src="images/card10/3.jpg" alt="Estampillas Argentinas- Vista 3">
-                                <img src="images/card10/4.jpg" alt="Estampillas Argentinas - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/card10/1.jpg" alt="Estampillas Argentinas - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/card10/2.jpg" alt="Estampillas Argentinas - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/card10/3.jpg" alt="Estampillas Argentinas- Vista 3">
+                                <img loading="lazy" decoding="async" src="images/card10/4.jpg" alt="Estampillas Argentinas - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -506,10 +507,10 @@
                         <div class="product-carousel">
                             <a href="product-1.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 1">
-                                <img src="images/card1/01.jpeg" alt="Escarapelas Ilustradas - Vista 1" class="active">
-                                <img src="images/card1/02.jpeg" alt="Escarapelas Ilustradas - Vista 2">
-                                <img src="images/card1/03.jpeg" alt="Escarapelas Ilustradas - Vista 3">
-                                <img src="images/card1/04.jpeg" alt="Escarapelas Ilustradas - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/card1/01.jpeg" alt="Escarapelas Ilustradas - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/card1/02.jpeg" alt="Escarapelas Ilustradas - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/card1/03.jpeg" alt="Escarapelas Ilustradas - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/card1/04.jpeg" alt="Escarapelas Ilustradas - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -546,10 +547,10 @@
                         <div class="product-carousel">
                             <a href="product-2.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 1">
-                                <img src="images/card2/01.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
-                                <img src="images/card2/02.jpg" alt="Escarapelas Ilustradas - Vista 2">
-                                <img src="images/card2/03.jpg" alt="Escarapelas Ilustradas - Vista 3">
-                                <img src="images/card2/04.jpg" alt="Escarapelas Ilustradas - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/card2/01.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/card2/02.jpg" alt="Escarapelas Ilustradas - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/card2/03.jpg" alt="Escarapelas Ilustradas - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/card2/04.jpg" alt="Escarapelas Ilustradas - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -586,10 +587,10 @@
                         <div class="product-carousel">
                             <a href="product-3.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 1">
-                                <img src="images/Bitacora/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
-                                <img src="images/Bitacora/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
-                                <img src="images/Bitacora/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
-                                <img src="images/Bitacora/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/Bitacora/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/Bitacora/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/Bitacora/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/Bitacora/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -627,10 +628,10 @@
                         <div class="product-carousel">
                             <a href="product-4.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 1">
-                                <img src="images/card4/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
-                                <img src="images/card4/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
-                                <img src="images/card4/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
-                                <img src="images/card4/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/card4/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/card4/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/card4/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/card4/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -668,10 +669,10 @@
                         <div class="product-carousel">
                             <a href="product-5.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 1">
-                                <img src="images/card5/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
-                                <img src="images/card5/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
-                                <img src="images/card5/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
-                                <img src="images/card5/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/card5/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/card5/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/card5/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/card5/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -710,10 +711,10 @@
                         <div class="product-carousel">
                             <a href="product-6.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 1">
-                                <img src="images/card6/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
-                                <img src="images/card6/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
-                                <img src="images/card6/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
-                                <img src="images/card6/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/card6/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/card6/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/card6/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/card6/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -750,10 +751,10 @@
                         <div class="product-carousel">
                             <a href="product-7.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 1">
-                                <img src="images/card7/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
-                                <img src="images/card7/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
-                                <img src="images/card7/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
-                                <img src="images/card7/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/card7/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/card7/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/card7/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/card7/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -791,10 +792,10 @@
                         <div class="product-carousel">
                             <a href="product-8.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 8">
-                                <img src="images/card8/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
-                                <img src="images/card8/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
-                                <img src="images/card8/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
-                                <img src="images/card8/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/card8/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/card8/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/card8/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/card8/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -832,10 +833,10 @@
                         <div class="product-carousel">
                             <a href="product-9.html" class="product-carousel-slides"
                                 aria-label="Ver especificaciones de Proyecto 9">
-                                <img src="images/card9/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
-                                <img src="images/card9/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
-                                <img src="images/card9/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
-                                <img src="images/card9/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
+                                <img loading="lazy" decoding="async" src="images/card9/1.jpg" alt="Escarapelas Ilustradas - Vista 1" class="active">
+                                <img loading="lazy" decoding="async" src="images/card9/2.jpg" alt="Escarapelas Ilustradas - Vista 2">
+                                <img loading="lazy" decoding="async" src="images/card9/3.jpg" alt="Escarapelas Ilustradas - Vista 3">
+                                <img loading="lazy" decoding="async" src="images/card9/4.jpg" alt="Escarapelas Ilustradas - Vista 4">
                             </a>
                             <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                                 <i data-lucide="chevron-left"></i>
@@ -898,7 +899,7 @@
                     <div class="carousel-slide active">
                         <div class="slide-content">
                             <div class="slide-image">
-                                <img src="images/flyers/Flyer1.jpg" alt="COLECCIÓN DE AUTOR">
+                                <img loading="lazy" decoding="async" src="images/flyers/Flyer1.jpg" alt="COLECCIÓN DE AUTOR">
                             </div>
                             <div class="slide-text">
                                 <div class="slide-badge">COLECCIÓN DE AUTOR</div>
@@ -915,7 +916,7 @@
                     <div class="carousel-slide">
                         <div class="slide-content">
                             <div class="slide-image">
-                                <img src="images/flyers/flyer2.jpg" alt="COLECCIÓN DE AUTOR">
+                                <img loading="lazy" decoding="async" src="images/flyers/flyer2.jpg" alt="COLECCIÓN DE AUTOR">
                             </div>
                             <div class="slide-text">
                                 <div class="slide-badge">COLECCIÓN DE AUTOR</div>
@@ -932,7 +933,7 @@
                     <div class="carousel-slide">
                         <div class="slide-content">
                             <div class="slide-image">
-                                <img src="images/flyers/flyer3.jpg" alt="COLECCIÓN DE AUTOR">
+                                <img loading="lazy" decoding="async" src="images/flyers/flyer3.jpg" alt="COLECCIÓN DE AUTOR">
                             </div>
                             <div class="slide-text">
                                 <div class="slide-badge">COLECCIÓN DE AUTOR</div>
@@ -968,7 +969,7 @@
             <div class="grid-container about-grid">
                 <div class="about-visual animate-on-scroll">
                     <div class="about-image-wrapper">
-                        <img src="images/magdalena.jpg" alt="Magdalena, Creadora de Die Brucke" class="about-img">
+                        <img loading="lazy" decoding="async" src="images/magdalena.jpg" alt="Magdalena, Creadora de Die Brucke" class="about-img">
                         <div class="about-tag">MAGDALENA • EMPRENDEDORA DIGITAL</div>
                     </div>
                 </div>
