@@ -2,22 +2,22 @@
 
 /* CSS Variables */
 :root {
-    --bg: #050505;
+    --bg: #000000;
     --surface: #0a0a0a;
     --surface-tinted: #111111;
-    --surface-low: #080808;
+    --surface-low: #050505;
     --surface-high: #151515;
     --text: #ffffff;
     --text-muted: #a1a1aa;
     --primary: #ffffff;
     --primary-container: #222222;
-    --accent: #dfff00;
+    --accent: #00e5ff;
     --accent-contrast: #000000;
-    --accent-muted: #99aa00;
-    --tertiary: #444444;
-    --border: rgba(255, 255, 255, 0.08);
-    --border-hover: rgba(255, 255, 255, 0.15);
-    --border-focus: #dfff00;
+    --accent-muted: #00b8cc;
+    --tertiary: #666666;
+    --border: rgba(255, 255, 255, 0.1);
+    --border-hover: rgba(255, 255, 255, 0.2);
+    --border-focus: #00e5ff;
     --shadow-color: rgba(0, 0, 0, 0.5);
     --shadow-lg: none;
     --shadow-ghost: none;
@@ -58,28 +58,28 @@ body.dark-mode {
 }
 
 body.dark-mode .btn-secondary {
-    background-color: transparent;
-    border-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(31, 44, 55, 0.7);
 }
 
 body.dark-mode .floating-blueprint-card,
 body.dark-mode .catalog-card,
 body.dark-mode .newsletter-form,
 body.dark-mode .contact-form-container {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: linear-gradient(180deg, rgba(31, 44, 55, 0.95), var(--surface));
 }
 
-body.dark-mode .showcase-section,
-body.dark-mode .hero-stats,
-body.dark-mode .contact-section,
-body.dark-mode .main-footer {
-    background: var(--bg);
+body.dark-mode .showcase-section {
+    background: linear-gradient(180deg, var(--surface-low), rgba(18, 24, 29, 0.9));
 }
 
 body.dark-mode .slide-text {
-    background: rgba(10, 10, 10, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: linear-gradient(160deg, rgba(25, 34, 42, 0.95), rgba(25, 34, 42, 0.82));
+}
+
+body.dark-mode .hero-stats,
+body.dark-mode .contact-section,
+body.dark-mode .main-footer {
+    background: var(--surface-low);
 }
 
 /* Base Styles & Reset */
@@ -127,33 +127,9 @@ button, select, input, textarea {
 /* Typography */
 h1, h2, h3, h4 {
     font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: -0.04em;
-    line-height: 1.1;
-}
-
-.section-title {
-    text-transform: lowercase;
-    font-size: 4.5rem;
-    color: var(--text);
-    margin-bottom: 3rem;
-}
-
-.badge {
-    background: transparent !important;
-    border: 1px solid var(--border);
-    color: var(--accent);
-    padding: 6px 12px;
-    font-size: 0.75rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-}
-
-.badge::before {
-    content: "■";
-    margin-right: 6px;
-    font-size: 0.8em;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
 }
 
 /* Layout Utilities */
@@ -342,16 +318,22 @@ body.dark-mode .main-header {
 
 /* Buttons */
 .btn-primary {
-    background: var(--accent);
+    background: linear-gradient(140deg, var(--accent), #b48d5c);
     color: var(--accent-contrast);
+    font-family: var(--font-body);
+    font-weight: 600;
+    padding: 12px 28px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    background-color: var(--primary);
+    color: var(--surface);
     border: none;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-family: var(--font-body);
-    font-weight: 700;
-    font-size: 0.9rem;
-    padding: 16px 32px;
-    border-radius: 0;
+    font-weight: 600;
+    padding: 12px 28px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -360,22 +342,14 @@ body.dark-mode .main-header {
 }
 
 .btn-primary:hover, .btn-primary:focus-visible {
-    background: var(--accent-muted);
-    color: var(--accent-contrast);
+    background-color: var(--primary-container);
+    color: var(--surface);
     transform: translateY(-2px);
 }
 
 .btn-secondary {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-family: var(--font-body);
-    font-weight: 700;
-    font-size: 0.9rem;
-    padding: 16px 32px;
-    border-radius: 0;
+    padding: 12px 28px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -384,8 +358,8 @@ body.dark-mode .main-header {
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.4);
+    background-color: var(--surface-low);
+    border-color: var(--text);
     transform: translateY(-2px);
 }
 
@@ -581,32 +555,23 @@ body.dark-mode .mobile-drawer {
 }
 
 .hero-grid {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 64px;
     align-items: center;
-    text-align: center;
-}
-
-.hero-visual {
-    display: none;
 }
 
 .hero-content {
-    max-width: 800px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    max-width: 680px;
 }
 
 .hero-title {
-    font-size: clamp(3rem, 7vw, 5rem);
+    font-size: clamp(2.2rem, 6vw, 3.5rem);
     font-weight: 800;
     line-height: 1.1;
     color: var(--text);
     margin-bottom: 24px;
     text-wrap: balance;
-    text-transform: uppercase;
 }
 
 .hero-title-sub {
@@ -963,18 +928,20 @@ body.dark-mode .mobile-drawer {
 }
 
 .catalog-card {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), var(--surface));
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
     overflow: hidden;
     display: flex;
     flex-direction: column;
     transition: var(--transition-smooth);
+    box-shadow: var(--shadow-lg);
 }
 
 .catalog-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-10px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-ghost);
 }
 
 .card-image > a {
@@ -1650,9 +1617,9 @@ body.dark-mode .mobile-drawer {
 .form-group select,
 .form-group textarea {
     background-color: var(--surface-low);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 0;
-    padding: 16px 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
     color: var(--text);
     width: 100%;
     transition: var(--transition-smooth);
@@ -1663,8 +1630,7 @@ body.dark-mode .mobile-drawer {
 .form-group textarea:focus {
     border-color: var(--border-focus);
     background-color: var(--surface);
-    box-shadow: none;
-    outline: none;
+    box-shadow: 0 0 0 3px rgba(196, 164, 124, 0.2);
 }
 
 .form-feedback-message {
