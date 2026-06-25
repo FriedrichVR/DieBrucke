@@ -18,13 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function checkAuth() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-        verifyAdmin(session.user);
-    } else {
-        showView('login');
-        localStorage.removeItem('adminMode');
-    }
+    // Temporarily bypass auth for testing UI
+    localStorage.setItem('adminMode', 'true');
+    document.getElementById('sidebar').style.display = 'flex';
+    document.getElementById('login-view').classList.remove('active');
+    showView('dashboard');
+    loadDashboardData();
 }
 
 async function verifyAdmin(user) {
