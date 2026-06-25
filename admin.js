@@ -123,43 +123,84 @@ function initLogoutBtn() {
 
 async function loadDashboardData() {
     // Fetch metrics
-    const { data: metrics } = await supabaseClient
+    const { data: metrics, error: metricsError } = await supabaseClient
         .from('web_metrics')
-        .select('*');
-    
-    document.getElementById('total-visits').textContent = metrics ? metrics.length : 0;
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    // Calculate Average Time
-    if (metrics && metrics.length > 0) {
-        let totalTime = 0;
-        let validTimeEntries = 0;
+    if (metricsError) {
+        console.error('Error fetching metrics:', metricsError);
+        return;
+    }
+
+    // Chart.js Global defaults for minimalist look
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.05)';
+    Chart.defaults.scale.grid.borderColor = 'transparent';
+
+    let totalVisits = 0;
+    let totalTime = 0;
+    let timeRecords = 0;
+    let uniqueClients = new Set();
+    let bounces = 0;
+
+    if (metrics) {
+        totalVisits = metrics.length;
         metrics.forEach(m => {
-            if (m.duration_seconds && m.duration_seconds > 0 && m.duration_seconds < 7200) { // filter out weird anomalies
+            if (m.client_id) uniqueClients.add(m.client_id);
+            if (m.duration_seconds > 0) {
                 totalTime += m.duration_seconds;
-                validTimeEntries++;
+                timeRecords++;
+            }
+            // Bounce: duration < 5s
+            if (m.duration_seconds < 5) {
+                bounces++;
             }
         });
-        const avgTime = validTimeEntries > 0 ? Math.floor(totalTime / validTimeEntries) : 0;
-        document.getElementById('avg-time-page').textContent = `${avgTime} seg`;
+    }
+
+    document.getElementById('total-visits').textContent = totalVisits;
+    document.getElementById('unique-visitors').textContent = uniqueClients.size;
+    
+    if (timeRecords > 0) {
+        document.getElementById('avg-time-page').textContent = Math.round(totalTime / timeRecords) + ' seg';
     } else {
         document.getElementById('avg-time-page').textContent = '0 seg';
     }
 
-    // Fetch payments
+    if (totalVisits > 0) {
+        document.getElementById('bounce-rate').textContent = Math.round((bounces / totalVisits) * 100) + '%';
+    } else {
+        document.getElementById('bounce-rate').textContent = '0%';
+    }
+
+    // Fetch payments and downloads
     const { data: payments } = await supabaseClient
         .from('payment_records')
-        .select('amount, created_at, product_name')
-        .eq('status', 'approved');
+        .select('amount, created_at, product_name, status')
+        .in('status', ['approved', 'free_download']);
     
     let totalRevenue = 0;
     let totalSales = 0;
+    let totalDownloads = 0;
+
     if (payments) {
-        totalSales = payments.length;
-        totalRevenue = payments.reduce((acc, curr) => acc + Number(curr.amount), 0);
+        payments.forEach(p => {
+            if (p.status === 'approved') {
+                totalSales++;
+                totalRevenue += Number(p.amount) || 0;
+                totalDownloads++; // paid counts as download too
+            } else if (p.status === 'free_download') {
+                totalDownloads++;
+            }
+        });
     }
 
     document.getElementById('total-revenue').textContent = '$' + totalRevenue.toLocaleString('es-AR');
     document.getElementById('total-sales').textContent = totalSales;
+    const downloadEl = document.getElementById('total-downloads');
+    if (downloadEl) downloadEl.textContent = totalDownloads;
 
     if (metrics) {
         renderCharts(metrics, payments || []);
@@ -225,6 +266,20 @@ function renderCharts(metrics, payments) {
         sources[source] = (sources[source] || 0) + 1;
     });
 
+    // Common Tooltip Callback for Percentages
+    const percentageTooltip = {
+        callbacks: {
+            label: function(context) {
+                let label = context.label || '';
+                if (label) label += ': ';
+                let value = context.raw;
+                let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                let percentage = total > 0 ? Math.round((value / total) * 100) + '%' : '0%';
+                return label + value + ' (' + percentage + ')';
+            }
+        }
+    };
+
     const sourcesCtx = document.getElementById('sourcesChart');
     if (sourcesChartInstance) sourcesChartInstance.destroy();
     sourcesChartInstance = new Chart(sourcesCtx, {
@@ -240,7 +295,8 @@ function renderCharts(metrics, payments) {
         options: {
             responsive: true,
             plugins: {
-                legend: { position: 'right' }
+                legend: { position: 'right' },
+                tooltip: percentageTooltip
             }
         }
     });
@@ -280,7 +336,7 @@ function renderCharts(metrics, payments) {
     }
 
     payments.forEach(p => {
-        if (p.created_at) {
+        if (p.created_at && p.status === 'approved') {
             const dateStr = new Date(p.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
             if (salesDates[dateStr] !== undefined) {
                 salesDates[dateStr] += Number(p.amount) || 0;
@@ -329,7 +385,10 @@ function renderCharts(metrics, payments) {
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: 'right' } }
+            plugins: { 
+                legend: { position: 'right' },
+                tooltip: percentageTooltip
+            }
         }
     });
 
@@ -339,8 +398,11 @@ function renderCharts(metrics, payments) {
         let device = 'Otro';
         if (m.user_agent) {
             const ua = m.user_agent.toLowerCase();
-            if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) device = 'Móvil';
-            else device = 'Escritorio';
+            if (ua.includes('chrome') && !ua.includes('edg')) device = 'Chrome';
+            else if (ua.includes('safari') && !ua.includes('chrome')) device = 'Safari';
+            else if (ua.includes('firefox')) device = 'Firefox';
+            else if (ua.includes('edg')) device = 'Edge';
+            else if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) device = 'Móvil genérico';
         }
         devices[device] = (devices[device] || 0) + 1;
     });
@@ -353,50 +415,54 @@ function renderCharts(metrics, payments) {
             labels: Object.keys(devices),
             datasets: [{
                 data: Object.values(devices),
-                backgroundColor: ['#8b5cf6', '#3b82f6', '#00e5ff'],
+                backgroundColor: ['#38bdf8', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'],
                 borderWidth: 0
             }]
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: 'bottom' } }
+            plugins: { 
+                legend: { position: 'bottom' },
+                tooltip: percentageTooltip
+            }
         }
     });
 }
 
 async function loadPayments() {
-    const tbody = document.getElementById('payments-table-body');
-    tbody.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
-
     const { data, error } = await supabaseClient
         .from('payment_records')
         .select('*')
+        .in('status', ['approved', 'free_download'])
         .order('created_at', { ascending: false })
         .limit(50);
     
     if (error) {
-        tbody.innerHTML = '<tr><td colspan="5">Error al cargar pagos.</td></tr>';
+        console.error('Error fetching payments:', error);
         return;
     }
+
+    const tbody = document.getElementById('payments-table-body');
+    tbody.innerHTML = '';
 
     if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5">No hay pagos registrados.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay pagos o descargas registrados.</td></tr>';
         return;
     }
 
-    tbody.innerHTML = '';
     data.forEach(p => {
         const date = new Date(p.created_at).toLocaleString('es-AR');
-        const statusClass = p.status === 'approved' ? 'status-approved' : '';
-        const statusText = p.status === 'approved' ? 'Aprobado' : p.status;
+        const amount = p.status === 'free_download' ? 'Gratis' : `$${Number(p.amount).toLocaleString('es-AR')}`;
+        const statusClass = p.status === 'approved' ? 'status-approved' : 'status-free';
+        const statusLabel = p.status === 'approved' ? 'Aprobado' : 'Gratis';
         
         tbody.innerHTML += `
             <tr>
                 <td>${date}</td>
-                <td>${p.client_name || p.client_email || 'Anónimo'}</td>
-                <td>${p.product_name}</td>
-                <td>$${p.amount}</td>
-                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td>${p.product_name || '-'}</td>
+                <td>${p.email || '-'}</td>
+                <td>${amount}</td>
+                <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
             </tr>
         `;
     });

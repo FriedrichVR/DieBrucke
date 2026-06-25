@@ -1302,6 +1302,28 @@ function initDownloadModal() {
     if (skipBtn) {
         skipBtn.addEventListener('click', () => {
             const name = document.getElementById('download-name').value.trim();
+            const emailInput = document.getElementById('download-email');
+            const email = emailInput ? emailInput.value.trim() : '';
+            
+            // Track free download in Supabase
+            const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG9jcXNyeXV2aGN3bWpqYmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzQ5MjMsImV4cCI6MjA5NzkxMDkyM30.uinZ-RlDIuQ7ZQlknhCmLef7Rzcb1DCWuxvwywkEFuw';
+            fetch('https://uelocqsryuvhcwmjjbho.supabase.co/rest/v1/payment_records', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': apiKey,
+                    'Authorization': 'Bearer ' + apiKey
+                },
+                body: JSON.stringify({
+                    amount: 0,
+                    status: 'free_download',
+                    product_name: activeProductName,
+                    email: email,
+                    preference_id: 'free_' + Date.now(), // in case it's required
+                    payment_id: 'free_' + Date.now()
+                })
+            }).catch(e => console.error('Tracking error', e));
+
             triggerDownload();
             showSuccessState(name);
         });
