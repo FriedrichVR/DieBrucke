@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Die Brücke</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Admin CSS -->
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="sidebar" style="display: none;">
+            <div class="sidebar-header">
+                <h2>DB Admin</h2>
+                <span class="badge">MODO ADMIN</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-target="dashboard">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item" data-target="payments">
+                    <i data-lucide="credit-card"></i> Pagos
+                </a>
+                <a href="#" class="nav-item" data-target="metrics">
+                    <i data-lucide="bar-chart-2"></i> Visitas Web
+                </a>
+                <a href="#" class="nav-item" data-target="bypass">
+                    <i data-lucide="unlock"></i> Simulador Compras
+                </a>
+                <a href="/" class="nav-item back-web">
+                    <i data-lucide="globe"></i> Volver a la Web
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="btn btn-outline">
+                    <i data-lucide="log-out"></i> Cerrar Sesión
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Login View -->
+            <div id="login-view" class="view active">
+                <div class="login-card">
+                    <div class="login-header">
+                        <h1>Die Brücke</h1>
+                        <p class="subtitle">Panel de Administración</p>
+                    </div>
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" required placeholder="admin@diebrucke.studio">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Contraseña</label>
+                            <input type="password" id="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" id="login-submit">Ingresar</button>
+                    </form>
+                    <div id="login-error" class="error-msg"></div>
+                </div>
+            </div>
+
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="view">
+                <header class="topbar">
+                    <h1>Resumen General</h1>
+                </header>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i data-lucide="users"></i></div>
+                        <div class="stat-info">
+                            <h3>Visitas Totales</h3>
+                            <p id="total-visits">Cargando...</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i data-lucide="dollar-sign"></i></div>
+                        <div class="stat-info">
+                            <h3>Ingresos</h3>
+                            <p id="total-revenue">Cargando...</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i data-lucide="shopping-bag"></i></div>
+                        <div class="stat-info">
+                            <h3>Ventas</h3>
+                            <p id="total-sales">Cargando...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payments View -->
+            <div id="payments-view" class="view">
+                <header class="topbar">
+                    <h1>Últimos Pagos</h1>
+                </header>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Producto</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payments-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Metrics View -->
+            <div id="metrics-view" class="view">
+                <header class="topbar">
+                    <h1>Métricas de Visitas</h1>
+                </header>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Página</th>
+                                <th>Origen (UTM/Referrer)</th>
+                                <th>Cliente Único</th>
+                            </tr>
+                        </thead>
+                        <tbody id="metrics-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Bypass Purchase View -->
+            <div id="bypass-view" class="view">
+                <header class="topbar">
+                    <h1>Simular Compra / Bypass</h1>
+                    <p class="subtitle">Activa el modo administrador en el sitio para saltarte los pagos.</p>
+                </header>
+                <div class="card-container">
+                    <div class="login-card bypass-card">
+                        <div class="alert-info">
+                            <i data-lucide="info"></i>
+                            <p>Mientras estés logueado como administrador, todos los botones de "Comprar" en la web te permitirán descargar directamente los archivos sin pasar por Mercado Pago.</p>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <a href="/" class="btn btn-primary w-100" style="text-align: center; display: block; text-decoration: none;">Ir a la Web a descargar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Admin JS -->
+    <script src="admin.js"></script>
+</body>
+</html>

@@ -128,7 +128,40 @@ export default async function handler(req, res) {
             ? 'https://n8n.srv1202174.hstgr.cloud/webhook/65debfa2-2837-4f6b-8052-093144fcc2d8'
             : 'https://n8n.srv1202174.hstgr.cloud/webhook-test/65debfa2-2837-4f6b-8052-093144fcc2d8';
 
-        console.log(`Pago ${paymentId} aprobado. Enviando webhook a n8n (${isProduction ? 'Producción' : 'Testing'})...`);
+        console.log(`Pago ${paymentId} aprobado. Guardando en Supabase y enviando webhook a n8n...`);
+
+        // Insert into Supabase
+        try {
+            const supabaseUrl = process.env.SUPABASE_URL || 'https://uelocqsryuvhcwmjjbho.supabase.co';
+            // Use the service role key from .env to bypass RLS for inserting
+            const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+            
+            if (supabaseKey) {
+                await fetch(`${supabaseUrl}/rest/v1/payment_records`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`,
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        payment_id: paymentId.toString(),
+                        status: payment.status,
+                        amount: Number(payment.transaction_amount),
+                        product_name: productName,
+                        client_email: clientEmail,
+                        client_name: clientName,
+                        environment: environment
+                    })
+                });
+            } else {
+                console.warn('Falta SUPABASE_SERVICE_ROLE_KEY en el entorno.');
+            }
+        } catch (dbError) {
+            console.error('Error al guardar pago en Supabase:', dbError);
+            // We continue even if DB save fails to not block n8n
+        }
 
         try {
             const n8nResponse = await fetch(n8nWebhookUrl, {
