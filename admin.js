@@ -460,7 +460,7 @@ async function loadPayments() {
             <tr>
                 <td>${date}</td>
                 <td>${p.product_name || '-'}</td>
-                <td>${p.client_name || p.client_email || 'Anónimo'}</td>
+                <td>${p.email || '-'}</td>
                 <td>${amount}</td>
                 <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
             </tr>

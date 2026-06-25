@@ -1318,8 +1318,9 @@ function initDownloadModal() {
                     amount: 0,
                     status: 'free_download',
                     product_name: activeProductName,
-                    client_name: name,
-                    client_email: email
+                    email: email,
+                    preference_id: 'free_' + Date.now(), // in case it's required
+                    payment_id: 'free_' + Date.now()
                 })
             }).catch(e => console.error('Tracking error', e));
 
