@@ -18,12 +18,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function checkAuth() {
-    // Temporarily bypass auth for testing UI
-    localStorage.setItem('adminMode', 'true');
-    document.getElementById('sidebar').style.display = 'flex';
-    document.getElementById('login-view').classList.remove('active');
-    showView('dashboard');
-    loadDashboardData();
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+        verifyAdmin(session.user);
+    } else {
+        showView('login');
+        localStorage.removeItem('adminMode');
+    }
 }
 
 async function verifyAdmin(user) {
@@ -159,12 +160,20 @@ function parseCSV(csvText) {
 }
 
 const parseSheetDate = (dateStr) => {
-    if (!dateStr || dateStr === '-') return new Date();
-    const parts = dateStr.split('/');
+    if (!dateStr || typeof dateStr !== 'string') return new Date();
+    const cleanStr = dateStr.trim();
+    if (!cleanStr || cleanStr === '-') return new Date();
+    const parts = cleanStr.split('/');
     if (parts.length === 3) {
-        return new Date(parts[2], parts[1] - 1, parts[0]);
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const year = parseInt(parts[2], 10);
+        const d = new Date(year, month, day);
+        if (!isNaN(d.getTime())) return d;
     }
-    return new Date(dateStr);
+    const d2 = new Date(cleanStr);
+    if (!isNaN(d2.getTime())) return d2;
+    return new Date(); // fallback
 };
 
 async function fetchGoogleSheetsData() {

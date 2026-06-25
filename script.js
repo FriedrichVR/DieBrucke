@@ -484,6 +484,25 @@ function handleNewsletterSubmit(event) {
         source: 'newsletter'
     });
 
+    // Save to Supabase payment_records
+    const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG9jcXNyeXV2aGN3bWpqYmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzQ5MjMsImV4cCI6MjA5NzkxMDkyM30.uinZ-RlDIuQ7ZQlknhCmLef7Rzcb1DCWuxvwywkEFuw';
+    fetch('https://uelocqsryuvhcwmjjbho.supabase.co/rest/v1/payment_records', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': apiKey,
+            'Authorization': 'Bearer ' + apiKey
+        },
+        body: JSON.stringify({
+            amount: 0,
+            status: 'newsletter',
+            product_name: 'Suscripción Newsletter',
+            client_email: email,
+            client_name: name,
+            payment_id: 'news_' + Date.now()
+        })
+    }).catch(e => console.error('Supabase Newsletter error', e));
+
     setTimeout(() => {
         feedbackMsg.textContent = '¡Te has registrado con éxito! Pronto recibirás tus primeros assets gratis.';
         feedbackMsg.className = 'form-feedback-message success';
@@ -568,6 +587,25 @@ function handleContactSubmit(event) {
         message: message,
         source: 'contact_form'
     });
+
+    // Save to Supabase payment_records
+    const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG9jcXNyeXV2aGN3bWpqYmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzQ5MjMsImV4cCI6MjA5NzkxMDkyM30.uinZ-RlDIuQ7ZQlknhCmLef7Rzcb1DCWuxvwywkEFuw';
+    fetch('https://uelocqsryuvhcwmjjbho.supabase.co/rest/v1/payment_records', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': apiKey,
+            'Authorization': 'Bearer ' + apiKey
+        },
+        body: JSON.stringify({
+            amount: 0,
+            status: 'contact',
+            product_name: 'Formulario de Contacto - ' + projectType,
+            client_email: email,
+            client_name: name,
+            payment_id: 'contact_' + Date.now()
+        })
+    }).catch(e => console.error('Supabase Contact error', e));
 
     setTimeout(() => {
         feedbackMsg.textContent = '¡Solicitud enviada con éxito! Magdalena revisará tus especificaciones y te contactará en las próximas 24 horas.';
