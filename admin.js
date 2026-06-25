@@ -1,6 +1,6 @@
 const supabaseUrl = 'https://uelocqsryuvhcwmjjbho.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG9jcXNyeXV2aGN3bWpqYmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzQ5MjMsImV4cCI6MjA5NzkxMDkyM30.uinZ-RlDIuQ7ZQlknhCmLef7Rzcb1DCWuxvwywkEFuw';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function checkAuth() {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
         verifyAdmin(session.user);
     } else {
@@ -22,7 +22,7 @@ async function checkAuth() {
 
 async function verifyAdmin(user) {
     // Check if user is admin
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from('profiles')
         .select('role')
         .eq('id', user.id)
@@ -30,7 +30,7 @@ async function verifyAdmin(user) {
     
     if (error || !data || data.role !== 'admin') {
         alert('Acceso denegado. No tienes permisos de administrador.');
-        await supabase.auth.signOut();
+        await supabaseClient.auth.signOut();
         showView('login');
         localStorage.removeItem('adminMode');
         return;
@@ -85,7 +85,7 @@ function initLoginForm() {
             submitBtn.textContent = 'Ingresando...';
             submitBtn.disabled = true;
 
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
                 email,
                 password
             });
@@ -94,7 +94,8 @@ function initLoginForm() {
             submitBtn.disabled = false;
 
             if (error) {
-                errorDiv.textContent = 'Credenciales incorrectas o error de red.';
+                console.error(error);
+                errorDiv.textContent = `Error: ${error.message}`;
             } else {
                 verifyAdmin(data.user);
             }
@@ -106,7 +107,7 @@ function initLogoutBtn() {
     const btn = document.getElementById('logout-btn');
     if (btn) {
         btn.addEventListener('click', async () => {
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             localStorage.removeItem('adminMode');
             document.getElementById('sidebar').style.display = 'none';
             showView('login');
@@ -116,13 +117,13 @@ function initLogoutBtn() {
 
 async function loadDashboardData() {
     // Basic stats
-    const { count: visitsCount } = await supabase
+    const { count: visitsCount } = await supabaseClient
         .from('web_metrics')
         .select('*', { count: 'exact', head: true });
     
     document.getElementById('total-visits').textContent = visitsCount || 0;
 
-    const { data: payments } = await supabase
+    const { data: payments } = await supabaseClient
         .from('payment_records')
         .select('amount')
         .eq('status', 'approved');
@@ -142,7 +143,7 @@ async function loadPayments() {
     const tbody = document.getElementById('payments-table-body');
     tbody.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from('payment_records')
         .select('*')
         .order('created_at', { ascending: false })
@@ -180,7 +181,7 @@ async function loadMetrics() {
     const tbody = document.getElementById('metrics-table-body');
     tbody.innerHTML = '<tr><td colspan="4">Cargando...</td></tr>';
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from('web_metrics')
         .select('*')
         .order('created_at', { ascending: false })
