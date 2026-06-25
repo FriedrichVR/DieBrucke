@@ -1837,14 +1837,41 @@ function initAnalytics() {
         client_id: clientId
     };
 
+    const sessionStartTime = Date.now();
+    const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG9jcXNyeXV2aGN3bWpqYmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzQ5MjMsImV4cCI6MjA5NzkxMDkyM30.uinZ-RlDIuQ7ZQlknhCmLef7Rzcb1DCWuxvwywkEFuw';
+
     fetch('https://uelocqsryuvhcwmjjbho.supabase.co/rest/v1/web_metrics', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG9jcXNyeXV2aGN3bWpqYmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzQ5MjMsImV4cCI6MjA5NzkxMDkyM30.uinZ-RlDIuQ7ZQlknhCmLef7Rzcb1DCWuxvwywkEFuw',
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG9jcXNyeXV2aGN3bWpqYmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzQ5MjMsImV4cCI6MjA5NzkxMDkyM30.uinZ-RlDIuQ7ZQlknhCmLef7Rzcb1DCWuxvwywkEFuw'
+            'Prefer': 'return=representation',
+            'apikey': apiKey,
+            'Authorization': 'Bearer ' + apiKey
         },
         body: JSON.stringify(data)
-    }).catch(err => console.error('Analytics tracking error', err));
+    })
+    .then(res => res.json())
+    .then(rows => {
+        if (rows && rows.length > 0) {
+            const metricId = rows[0].id;
+            
+            // Track when user leaves page
+            window.addEventListener('beforeunload', () => {
+                const durationSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
+                
+                fetch(`https://uelocqsryuvhcwmjjbho.supabase.co/rest/v1/web_metrics?id=eq.${metricId}`, {
+                    method: 'PATCH',
+                    keepalive: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': apiKey,
+                        'Authorization': 'Bearer ' + apiKey
+                    },
+                    body: JSON.stringify({ duration_seconds: durationSeconds })
+                });
+            });
+        }
+    })
+    .catch(err => console.error('Analytics tracking error', err));
 }
 

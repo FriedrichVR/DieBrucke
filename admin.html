@@ -10,6 +10,8 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Admin CSS -->
     <link rel="stylesheet" href="admin.css">
 </head>
@@ -76,25 +78,47 @@
                 </header>
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon"><i data-lucide="users"></i></div>
+                        <div class="stat-icon" style="background-color: rgba(0, 229, 255, 0.1); color: var(--admin-primary);"><i data-lucide="users"></i></div>
                         <div class="stat-info">
                             <h3>Visitas Totales</h3>
                             <p id="total-visits">Cargando...</p>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon"><i data-lucide="dollar-sign"></i></div>
+                        <div class="stat-icon" style="background-color: rgba(0, 230, 118, 0.1); color: var(--admin-success);"><i data-lucide="dollar-sign"></i></div>
                         <div class="stat-info">
                             <h3>Ingresos</h3>
-                            <p id="total-revenue">Cargando...</p>
+                            <p id="total-revenue" style="color: var(--admin-success);">Cargando...</p>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon"><i data-lucide="shopping-bag"></i></div>
+                        <div class="stat-icon" style="background-color: rgba(0, 229, 255, 0.1); color: var(--admin-primary);"><i data-lucide="shopping-bag"></i></div>
                         <div class="stat-info">
                             <h3>Ventas</h3>
                             <p id="total-sales">Cargando...</p>
                         </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: rgba(244, 67, 54, 0.1); color: var(--admin-danger);"><i data-lucide="clock"></i></div>
+                        <div class="stat-info">
+                            <h3>Tiempo Promedio / Pagina</h3>
+                            <p id="avg-time-page">Cargando...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card chart-large">
+                        <h3>Visitas y Tiempo (Últimos 7 días)</h3>
+                        <canvas id="visitsChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Fuentes de Tráfico</h3>
+                        <canvas id="sourcesChart"></canvas>
+                    </div>
+                    <div class="chart-card chart-large">
+                        <h3>Visitas por Página</h3>
+                        <canvas id="pagesChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -135,6 +159,7 @@
                                 <th>Página</th>
                                 <th>Origen (UTM/Referrer)</th>
                                 <th>Cliente Único</th>
+                                <th>Tiempo (s)</th>
                             </tr>
                         </thead>
                         <tbody id="metrics-table-body">
