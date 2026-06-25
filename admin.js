@@ -5,6 +5,9 @@ const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 let visitsChartInstance = null;
 let sourcesChartInstance = null;
 let pagesChartInstance = null;
+let salesChartInstance = null;
+let productsChartInstance = null;
+let devicesChartInstance = null;
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     checkAuth();
@@ -145,7 +148,7 @@ async function loadDashboardData() {
     // Fetch payments
     const { data: payments } = await supabaseClient
         .from('payment_records')
-        .select('amount')
+        .select('amount, created_at, product_name')
         .eq('status', 'approved');
     
     let totalRevenue = 0;
@@ -159,11 +162,11 @@ async function loadDashboardData() {
     document.getElementById('total-sales').textContent = totalSales;
 
     if (metrics) {
-        renderCharts(metrics);
+        renderCharts(metrics, payments || []);
     }
 }
 
-function renderCharts(metrics) {
+function renderCharts(metrics, payments) {
     // Common Chart.js options for dark theme
     Chart.defaults.color = '#94a3b8';
     Chart.defaults.borderColor = '#2d3748';
@@ -257,7 +260,7 @@ function renderCharts(metrics) {
             datasets: [{
                 label: 'Visitas',
                 data: Object.values(pages),
-                backgroundColor: '#00e676',
+                backgroundColor: '#00e5ff',
                 borderRadius: 4
             }]
         },
@@ -265,6 +268,98 @@ function renderCharts(metrics) {
             responsive: true,
             plugins: { legend: { display: false } },
             scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+    });
+
+    // 4. Sales over time
+    const salesDates = {};
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        salesDates[d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })] = 0;
+    }
+
+    payments.forEach(p => {
+        if (p.created_at) {
+            const dateStr = new Date(p.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
+            if (salesDates[dateStr] !== undefined) {
+                salesDates[dateStr] += Number(p.amount) || 0;
+            }
+        }
+    });
+
+    const salesCtx = document.getElementById('salesChart');
+    if (salesChartInstance) salesChartInstance.destroy();
+    salesChartInstance = new Chart(salesCtx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(salesDates),
+            datasets: [{
+                label: 'Ingresos ($)',
+                data: Object.values(salesDates),
+                backgroundColor: '#00e676',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    // 5. Top Selling Products
+    const products = {};
+    payments.forEach(p => {
+        const prod = p.product_name || 'Desconocido';
+        products[prod] = (products[prod] || 0) + 1;
+    });
+
+    const productsCtx = document.getElementById('productsChart');
+    if (productsChartInstance) productsChartInstance.destroy();
+    productsChartInstance = new Chart(productsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(products),
+            datasets: [{
+                data: Object.values(products),
+                backgroundColor: ['#00e676', '#00e5ff', '#f59e0b', '#3b82f6', '#8b5cf6'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'right' } }
+        }
+    });
+
+    // 6. Devices / Browsers
+    const devices = {};
+    metrics.forEach(m => {
+        let device = 'Otro';
+        if (m.user_agent) {
+            const ua = m.user_agent.toLowerCase();
+            if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) device = 'Móvil';
+            else device = 'Escritorio';
+        }
+        devices[device] = (devices[device] || 0) + 1;
+    });
+
+    const devicesCtx = document.getElementById('devicesChart');
+    if (devicesChartInstance) devicesChartInstance.destroy();
+    devicesChartInstance = new Chart(devicesCtx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(devices),
+            datasets: [{
+                data: Object.values(devices),
+                backgroundColor: ['#8b5cf6', '#3b82f6', '#00e5ff'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } }
         }
     });
 }
