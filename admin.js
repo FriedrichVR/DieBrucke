@@ -8,6 +8,7 @@ let pagesChartInstance = null;
 let salesChartInstance = null;
 let productsChartInstance = null;
 let devicesChartInstance = null;
+
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     checkAuth();
@@ -121,8 +122,125 @@ function initLogoutBtn() {
     }
 }
 
+/* ==========================================================================
+   Google Sheets CSV Parsing & Fetching Helpers
+   ========================================================================== */
+function parseCSV(csvText) {
+    const rows = [];
+    let row = [''];
+    let inQuotes = false;
+
+    for (let i = 0; i < csvText.length; i++) {
+        const char = csvText[i];
+        const nextChar = csvText[i + 1];
+
+        if (char === '"') {
+            if (inQuotes && nextChar === '"') {
+                row[row.length - 1] += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (char === ',' && !inQuotes) {
+            row.push('');
+        } else if ((char === '\r' || char === '\n') && !inQuotes) {
+            if (char === '\r' && nextChar === '\n') {
+                i++;
+            }
+            rows.push(row);
+            row = [''];
+        } else {
+            row[row.length - 1] += char;
+        }
+    }
+    if (row.length > 1 || row[0] !== '') {
+        rows.push(row);
+    }
+    return rows;
+}
+
+const parseSheetDate = (dateStr) => {
+    if (!dateStr || dateStr === '-') return new Date();
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+    return new Date(dateStr);
+};
+
+async function fetchGoogleSheetsData() {
+    const spreadsheetId = '1-bCxZSOt4xAKd4k369M6CHjMsCU0JJHp9vEg9NlOzR8';
+    const urlFree = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=ClientesGratis`;
+    const urlPaid = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=Lead+de+Pago`;
+
+    try {
+        const [resFree, resPaid] = await Promise.all([
+            fetch(urlFree).then(r => r.text()),
+            fetch(urlPaid).then(r => r.text())
+        ]);
+
+        const freeRows = parseCSV(resFree);
+        const paidRows = parseCSV(resPaid);
+
+        // Format free downloads
+        const freeClients = freeRows
+            .filter(row => row[0] || row[1])
+            .map(row => {
+                const dateObj = parseSheetDate(row[2]);
+                return {
+                    name: row[0] || 'Cliente Gratis Sin Nombre',
+                    email: row[1] || '-',
+                    date: row[2] || '-',
+                    created_at: dateObj.toISOString(),
+                    amount: 0,
+                    status: 'free_download',
+                    product_name: 'Descarga Gratis'
+                };
+            });
+
+        // Format paid downloads
+        const paidClients = paidRows
+            .filter(row => row[0] || row[1])
+            .map(row => {
+                const dateObj = parseSheetDate(row[2]);
+                return {
+                    name: row[0] || 'Cliente De Pago Sin Nombre',
+                    email: row[1] || '-',
+                    date: row[2] || '-',
+                    created_at: dateObj.toISOString(),
+                    amount: 1000,
+                    status: 'approved',
+                    product_name: 'Lead de Pago'
+                };
+            });
+
+        // Merge all
+        const allClients = [...freeClients, ...paidClients];
+
+        // Sort by date (DD/MM/YYYY) descending
+        allClients.sort((a, b) => {
+            return parseSheetDate(b.date) - parseSheetDate(a.date);
+        });
+
+        return {
+            all: allClients,
+            freeCount: freeClients.length,
+            paidCount: paidClients.length,
+            revenue: paidClients.length * 1000
+        };
+    } catch (e) {
+        console.error('Error fetching Google Sheets data:', e);
+        return {
+            all: [],
+            freeCount: 0,
+            paidCount: 0,
+            revenue: 0
+        };
+    }
+}
+
 async function loadDashboardData() {
-    // Fetch metrics
+    // Fetch metrics from Supabase for traffic
     const { data: metrics, error: metricsError } = await supabaseClient
         .from('web_metrics')
         .select('*')
@@ -136,7 +254,7 @@ async function loadDashboardData() {
     // Chart.js Global defaults for minimalist look
     Chart.defaults.color = '#94a3b8';
     Chart.defaults.font.family = "'Inter', sans-serif";
-    Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.05)';
+    Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.03)';
     Chart.defaults.scale.grid.borderColor = 'transparent';
 
     let totalVisits = 0;
@@ -175,27 +293,13 @@ async function loadDashboardData() {
         document.getElementById('bounce-rate').textContent = '0%';
     }
 
-    // Fetch payments and downloads
-    const { data: payments } = await supabaseClient
-        .from('payment_records')
-        .select('amount, created_at, product_name, status')
-        .in('status', ['approved', 'free_download']);
+    // Fetch payments and downloads from Google Sheets
+    const sheetData = await fetchGoogleSheetsData();
+    const payments = sheetData.all;
     
-    let totalRevenue = 0;
-    let totalSales = 0;
-    let totalDownloads = 0;
-
-    if (payments) {
-        payments.forEach(p => {
-            if (p.status === 'approved') {
-                totalSales++;
-                totalRevenue += Number(p.amount) || 0;
-                totalDownloads++; // paid counts as download too
-            } else if (p.status === 'free_download') {
-                totalDownloads++;
-            }
-        });
-    }
+    const totalRevenue = sheetData.revenue;
+    const totalSales = sheetData.paidCount;
+    const totalDownloads = sheetData.freeCount + sheetData.paidCount;
 
     document.getElementById('total-revenue').textContent = '$' + totalRevenue.toLocaleString('es-AR');
     document.getElementById('total-sales').textContent = totalSales;
@@ -209,8 +313,8 @@ async function loadDashboardData() {
 
 function renderCharts(metrics, payments) {
     // Common Chart.js options for dark theme
-    Chart.defaults.color = '#94a3b8';
-    Chart.defaults.borderColor = '#2d3748';
+    Chart.defaults.color = '#8b8b8b';
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.05)';
 
     // 1. Visits over time (last 7 days)
     const dates = {};
@@ -237,8 +341,8 @@ function renderCharts(metrics, payments) {
             datasets: [{
                 label: 'Visitas',
                 data: Object.values(dates),
-                borderColor: '#00e5ff',
-                backgroundColor: 'rgba(0, 229, 255, 0.1)',
+                borderColor: '#00ffcc',
+                backgroundColor: 'rgba(0, 255, 204, 0.03)',
                 borderWidth: 2,
                 fill: true,
                 tension: 0.4
@@ -288,7 +392,7 @@ function renderCharts(metrics, payments) {
             labels: Object.keys(sources),
             datasets: [{
                 data: Object.values(sources),
-                backgroundColor: ['#00e5ff', '#00e676', '#3b82f6', '#f59e0b', '#8b5cf6'],
+                backgroundColor: ['#00ffcc', '#00ff66', '#3b82f6', '#f59e0b', '#8b5cf6'],
                 borderWidth: 0
             }]
         },
@@ -316,8 +420,8 @@ function renderCharts(metrics, payments) {
             datasets: [{
                 label: 'Visitas',
                 data: Object.values(pages),
-                backgroundColor: '#00e5ff',
-                borderRadius: 4
+                backgroundColor: '#00ffcc',
+                borderRadius: 0
             }]
         },
         options: {
@@ -353,8 +457,8 @@ function renderCharts(metrics, payments) {
             datasets: [{
                 label: 'Ingresos ($)',
                 data: Object.values(salesDates),
-                backgroundColor: '#00e676',
-                borderRadius: 4
+                backgroundColor: '#00ff66',
+                borderRadius: 0
             }]
         },
         options: {
@@ -364,7 +468,7 @@ function renderCharts(metrics, payments) {
         }
     });
 
-    // 5. Top Selling Products
+    // 5. Top Selling Products (Paid / Free downloads comparison from Sheet)
     const products = {};
     payments.forEach(p => {
         const prod = p.product_name || 'Desconocido';
@@ -379,7 +483,7 @@ function renderCharts(metrics, payments) {
             labels: Object.keys(products),
             datasets: [{
                 data: Object.values(products),
-                backgroundColor: ['#00e676', '#00e5ff', '#f59e0b', '#3b82f6', '#8b5cf6'],
+                backgroundColor: ['#00ff66', '#00ffcc', '#f59e0b', '#3b82f6', '#8b5cf6'],
                 borderWidth: 0
             }]
         },
@@ -415,7 +519,7 @@ function renderCharts(metrics, payments) {
             labels: Object.keys(devices),
             datasets: [{
                 data: Object.values(devices),
-                backgroundColor: ['#38bdf8', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'],
+                backgroundColor: ['#00ffcc', '#00ff66', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'],
                 borderWidth: 0
             }]
         },
@@ -430,37 +534,33 @@ function renderCharts(metrics, payments) {
 }
 
 async function loadPayments() {
-    const { data, error } = await supabaseClient
-        .from('payment_records')
-        .select('*')
-        .in('status', ['approved', 'free_download'])
-        .order('created_at', { ascending: false })
-        .limit(50);
-    
-    if (error) {
-        console.error('Error fetching payments:', error);
-        return;
-    }
-
     const tbody = document.getElementById('payments-table-body');
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 24px;">Cargando clientes desde Google Sheets...</td></tr>';
+
+    const sheetData = await fetchGoogleSheetsData();
+    const data = sheetData.all;
+    
     tbody.innerHTML = '';
 
     if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay pagos o descargas registrados.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 24px;">No hay clientes registrados en Google Sheets.</td></tr>';
         return;
     }
 
-    data.forEach(p => {
-        const date = new Date(p.created_at).toLocaleString('es-AR');
+    // Limit to 100 rows for display performance
+    const displayData = data.slice(0, 100);
+
+    displayData.forEach(p => {
+        const dateStr = p.date;
         const amount = p.status === 'free_download' ? 'Gratis' : `$${Number(p.amount).toLocaleString('es-AR')}`;
         const statusClass = p.status === 'approved' ? 'status-approved' : 'status-free';
-        const statusLabel = p.status === 'approved' ? 'Aprobado' : 'Gratis';
+        const statusLabel = p.status === 'approved' ? 'Pago' : 'Gratis';
         
         tbody.innerHTML += `
             <tr>
-                <td>${date}</td>
-                <td>${p.product_name || '-'}</td>
-                <td>${p.email || '-'}</td>
+                <td>${dateStr}</td>
+                <td>${p.name}</td>
+                <td>${p.email}</td>
                 <td>${amount}</td>
                 <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
             </tr>
@@ -470,7 +570,7 @@ async function loadPayments() {
 
 async function loadMetrics() {
     const tbody = document.getElementById('metrics-table-body');
-    tbody.innerHTML = '<tr><td colspan="4">Cargando...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 24px;">Cargando...</td></tr>';
 
     const { data, error } = await supabaseClient
         .from('web_metrics')
@@ -479,12 +579,12 @@ async function loadMetrics() {
         .limit(50);
     
     if (error) {
-        tbody.innerHTML = '<tr><td colspan="4">Error al cargar métricas.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 24px;">Error al cargar métricas.</td></tr>';
         return;
     }
 
     if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4">No hay métricas registradas.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 24px;">No hay métricas registradas.</td></tr>';
         return;
     }
 

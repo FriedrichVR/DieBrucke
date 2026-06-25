@@ -1318,7 +1318,8 @@ function initDownloadModal() {
                     amount: 0,
                     status: 'free_download',
                     product_name: activeProductName,
-                    email: email,
+                    client_email: email,
+                    client_name: name,
                     preference_id: 'free_' + Date.now(), // in case it's required
                     payment_id: 'free_' + Date.now()
                 })
