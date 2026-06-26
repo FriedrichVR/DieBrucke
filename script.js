@@ -33,9 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Coffee Donation Button
     initCoffeeButton();
-
-    // Initialize Analytics
-    initAnalytics();
 });
 
 /* ==========================================================================
@@ -484,25 +481,6 @@ function handleNewsletterSubmit(event) {
         source: 'newsletter'
     });
 
-    // Save to Supabase payment_records
-    const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG9jcXNyeXV2aGN3bWpqYmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzQ5MjMsImV4cCI6MjA5NzkxMDkyM30.uinZ-RlDIuQ7ZQlknhCmLef7Rzcb1DCWuxvwywkEFuw';
-    fetch('https://uelocqsryuvhcwmjjbho.supabase.co/rest/v1/payment_records', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'apikey': apiKey,
-            'Authorization': 'Bearer ' + apiKey
-        },
-        body: JSON.stringify({
-            amount: 0,
-            status: 'newsletter',
-            product_name: 'Suscripción Newsletter',
-            client_email: email,
-            client_name: name,
-            payment_id: 'news_' + Date.now()
-        })
-    }).catch(e => console.error('Supabase Newsletter error', e));
-
     setTimeout(() => {
         feedbackMsg.textContent = '¡Te has registrado con éxito! Pronto recibirás tus primeros assets gratis.';
         feedbackMsg.className = 'form-feedback-message success';
@@ -587,25 +565,6 @@ function handleContactSubmit(event) {
         message: message,
         source: 'contact_form'
     });
-
-    // Save to Supabase payment_records
-    const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG9jcXNyeXV2aGN3bWpqYmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzQ5MjMsImV4cCI6MjA5NzkxMDkyM30.uinZ-RlDIuQ7ZQlknhCmLef7Rzcb1DCWuxvwywkEFuw';
-    fetch('https://uelocqsryuvhcwmjjbho.supabase.co/rest/v1/payment_records', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'apikey': apiKey,
-            'Authorization': 'Bearer ' + apiKey
-        },
-        body: JSON.stringify({
-            amount: 0,
-            status: 'contact',
-            product_name: 'Formulario de Contacto - ' + projectType,
-            client_email: email,
-            client_name: name,
-            payment_id: 'contact_' + Date.now()
-        })
-    }).catch(e => console.error('Supabase Contact error', e));
 
     setTimeout(() => {
         feedbackMsg.textContent = '¡Solicitud enviada con éxito! Magdalena revisará tus especificaciones y te contactará en las próximas 24 horas.';
@@ -1138,17 +1097,6 @@ function initDownloadModal() {
     let activeProductPrice = 0;
 
     function openModal(prodName, url, filename, price = 0) {
-        if (localStorage.getItem('adminMode') === 'true') {
-            const prodLink = document.createElement('a');
-            prodLink.href = url;
-            prodLink.download = filename;
-            document.body.appendChild(prodLink);
-            prodLink.click();
-            document.body.removeChild(prodLink);
-            console.log(`[Admin Bypass] Descargando: ${prodName}`);
-            return;
-        }
-
         activeProductName = prodName;
         activeDownloadUrl = url;
         activeDownloadFilename = filename;
@@ -1340,29 +1288,6 @@ function initDownloadModal() {
     if (skipBtn) {
         skipBtn.addEventListener('click', () => {
             const name = document.getElementById('download-name').value.trim();
-            const emailInput = document.getElementById('download-email');
-            const email = emailInput ? emailInput.value.trim() : '';
-            
-            // Track free download in Supabase
-            const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG9jcXNyeXV2aGN3bWpqYmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzQ5MjMsImV4cCI6MjA5NzkxMDkyM30.uinZ-RlDIuQ7ZQlknhCmLef7Rzcb1DCWuxvwywkEFuw';
-            fetch('https://uelocqsryuvhcwmjjbho.supabase.co/rest/v1/payment_records', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': apiKey,
-                    'Authorization': 'Bearer ' + apiKey
-                },
-                body: JSON.stringify({
-                    amount: 0,
-                    status: 'free_download',
-                    product_name: activeProductName,
-                    client_email: email,
-                    client_name: name,
-                    preference_id: 'free_' + Date.now(), // in case it's required
-                    payment_id: 'free_' + Date.now()
-                })
-            }).catch(e => console.error('Tracking error', e));
-
             triggerDownload();
             showSuccessState(name);
         });
@@ -1870,69 +1795,5 @@ function addSwipeSupport(element, onSwipeLeft, onSwipeRight) {
         startX = 0;
         startY = 0;
     }, { passive: true });
-}
-
-/* ==========================================================================
-   12. Web Analytics Tracking
-   ========================================================================== */
-function initAnalytics() {
-    // Check if we are in admin mode to not track admin actions
-    if (localStorage.getItem('adminMode') === 'true') {
-        return;
-    }
-
-    let clientId = localStorage.getItem('client_id');
-    if (!clientId) {
-        clientId = 'client_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('client_id', clientId);
-    }
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const data = {
-        path: window.location.pathname,
-        user_agent: navigator.userAgent,
-        referrer: document.referrer || '',
-        utm_source: urlParams.get('utm_source') || '',
-        utm_medium: urlParams.get('utm_medium') || '',
-        utm_campaign: urlParams.get('utm_campaign') || '',
-        client_id: clientId
-    };
-
-    const sessionStartTime = Date.now();
-    const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG9jcXNyeXV2aGN3bWpqYmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzQ5MjMsImV4cCI6MjA5NzkxMDkyM30.uinZ-RlDIuQ7ZQlknhCmLef7Rzcb1DCWuxvwywkEFuw';
-
-    fetch('https://uelocqsryuvhcwmjjbho.supabase.co/rest/v1/web_metrics', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation',
-            'apikey': apiKey,
-            'Authorization': 'Bearer ' + apiKey
-        },
-        body: JSON.stringify(data)
-    })
-    .then(res => res.json())
-    .then(rows => {
-        if (rows && rows.length > 0) {
-            const metricId = rows[0].id;
-            
-            // Track when user leaves page
-            window.addEventListener('beforeunload', () => {
-                const durationSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
-                
-                fetch(`https://uelocqsryuvhcwmjjbho.supabase.co/rest/v1/web_metrics?id=eq.${metricId}`, {
-                    method: 'PATCH',
-                    keepalive: true,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': apiKey,
-                        'Authorization': 'Bearer ' + apiKey
-                    },
-                    body: JSON.stringify({ duration_seconds: durationSeconds })
-                });
-            });
-        }
-    })
-    .catch(err => console.error('Analytics tracking error', err));
 }
 
