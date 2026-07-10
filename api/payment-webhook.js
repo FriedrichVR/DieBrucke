@@ -140,8 +140,8 @@ export default async function handler(req, res) {
         if (pageUrl.includes('?')) {
             pageUrl = pageUrl.split('?')[0];
         }
-        // Forzar extensión .html si se omitió por URLs limpias (ej. /product-3 -> /product-3.html)
-        if (!pageUrl.endsWith('.html') && (pageUrl.endsWith('/product-3') || pageUrl.endsWith('/product-8'))) {
+        // Forzar extensión .html si se omitió por URLs limpias (ej. /product-31 -> /product-31.html)
+        if (!pageUrl.endsWith('.html') && pageUrl.includes('/product-')) {
             pageUrl = pageUrl + '.html';
         }
 

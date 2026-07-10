@@ -526,7 +526,7 @@ function sendToN8N(data, isPurchase = false) {
             environment: isLocal ? 'test' : 'production',
             pageUrl: (() => {
                 let url = window.location.origin + window.location.pathname;
-                if (!url.endsWith('.html') && (url.endsWith('/product-3') || url.endsWith('/product-8'))) {
+                if (!url.endsWith('.html') && url.includes('/product-')) {
                     url = url + '.html';
                 }
                 return url;
