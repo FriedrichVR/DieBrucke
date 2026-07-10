@@ -33,6 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Coffee Donation Button
     initCoffeeButton();
+
+    // Initialize Admin Bypass Indicator
+    initAdminBypass();
 });
 
 /* ==========================================================================
@@ -1110,7 +1113,9 @@ function initDownloadModal() {
         const submitBtnTextEl = document.getElementById('download-modal-submit-text');
         const submitBtnIconEl = document.getElementById('download-modal-submit-icon');
 
-        if (activeProductPrice > 0) {
+        const isAdminMode = localStorage.getItem('adminMode') === 'true';
+
+        if (activeProductPrice > 0 && !isAdminMode) {
             if (titleEl) titleEl.textContent = 'Adquirir Recurso';
             if (helpTextEl) helpTextEl.textContent = `Serás redirigido a Mercado Pago para realizar el pago de $${activeProductPrice.toLocaleString('es-AR')}.`;
             if (submitBtnTextEl) submitBtnTextEl.textContent = `Proceder al Pago ($${activeProductPrice.toLocaleString('es-AR')})`;
@@ -1118,8 +1123,10 @@ function initDownloadModal() {
                 submitBtnIconEl.setAttribute('data-lucide', 'credit-card');
             }
         } else {
-            if (titleEl) titleEl.textContent = 'Descarga Gratuita';
-            if (helpTextEl) helpTextEl.textContent = 'El archivo PDF se descargará automáticamente al confirmar.';
+            if (titleEl) titleEl.textContent = isAdminMode ? 'Bypass Admin - Descarga Directa' : 'Descarga Gratuita';
+            if (helpTextEl) helpTextEl.textContent = isAdminMode 
+                ? 'Modo administrador activo. El archivo se descargará directamente al confirmar.'
+                : 'El archivo PDF se descargará automáticamente al confirmar.';
             if (submitBtnTextEl) submitBtnTextEl.textContent = 'Confirmar y Descargar';
             if (submitBtnIconEl) {
                 submitBtnIconEl.setAttribute('data-lucide', 'download');
@@ -1207,8 +1214,10 @@ function initDownloadModal() {
 
         if (!name || !email) return;
 
-        // Send lead info to n8n in the background (only for free products on form submit)
-        const isPurchase = activeProductPrice > 0;
+        const isAdminMode = localStorage.getItem('adminMode') === 'true';
+        const isPurchase = activeProductPrice > 0 && !isAdminMode;
+
+        // Send lead info to n8n in the background (only for free products or admin bypass on form submit)
         if (!isPurchase) {
             sendToN8N({
                 name: name,
@@ -1216,11 +1225,11 @@ function initDownloadModal() {
                 productName: activeProductName,
                 downloadUrl: activeDownloadUrl,
                 filename: activeDownloadFilename,
-                source: 'download_modal'
+                source: isAdminMode ? 'admin_bypass_download' : 'download_modal'
             }, false);
         }
 
-        if (activeProductPrice > 0) {
+        if (isPurchase) {
             // Save state in localStorage to retrieve upon redirect back
             localStorage.setItem('pending_download_name', name);
             localStorage.setItem('pending_download_email', email);
@@ -1276,10 +1285,16 @@ function initDownloadModal() {
                 if (submitText) submitText.textContent = 'Proceder al Pago';
             }
         } else {
-            // Hide form and show donation panel for free products
-            document.getElementById('download-modal-form-container').style.display = 'none';
-            document.getElementById('download-modal-donation-container').style.display = 'block';
-            lucide.createIcons(); // Render heart icon
+            if (isAdminMode) {
+                // Trigger download directly and show success state
+                triggerDownload();
+                showSuccessState(name);
+            } else {
+                // Hide form and show donation panel for free products
+                document.getElementById('download-modal-form-container').style.display = 'none';
+                document.getElementById('download-modal-donation-container').style.display = 'block';
+                lucide.createIcons(); // Render heart icon
+            }
         }
     });
 
@@ -1795,5 +1810,59 @@ function addSwipeSupport(element, onSwipeLeft, onSwipeRight) {
         startX = 0;
         startY = 0;
     }, { passive: true });
+}
+
+/* ==========================================================================
+   12. Admin Bypass Mode Indicator
+   ========================================================================== */
+function initAdminBypass() {
+    const isAdminMode = localStorage.getItem('adminMode') === 'true';
+    if (!isAdminMode) return;
+
+    // Create floating badge
+    const badge = document.createElement('div');
+    badge.id = 'admin-bypass-badge';
+    badge.style.position = 'fixed';
+    badge.style.bottom = '20px';
+    badge.style.right = '20px';
+    badge.style.zIndex = '10000';
+    badge.style.backgroundColor = 'rgba(23, 42, 57, 0.95)'; // dark slate background
+    badge.style.color = '#efedef';
+    badge.style.padding = '12px 18px';
+    badge.style.borderRadius = '8px';
+    badge.style.border = '1px solid #c4a47c'; // accent color
+    badge.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.4)';
+    badge.style.fontFamily = "'Inter', sans-serif";
+    badge.style.fontSize = '14px';
+    badge.style.display = 'flex';
+    badge.style.alignItems = 'center';
+    badge.style.gap = '10px';
+    badge.style.backdropFilter = 'blur(8px)';
+
+    badge.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 8px; height: 8px; background-color: #00e676; border-radius: 50%; animation: pulse 1.5s infinite;"></span>
+            <strong>Modo Admin:</strong> Bypass de pagos activo
+        </div>
+        <a href="/admin.html" style="color: #c4a47c; text-decoration: none; font-weight: 600; margin-left: 10px; border-bottom: 1px solid transparent; transition: border-color 0.2s;" onmouseover="this.style.borderColor='#c4a47c'" onmouseout="this.style.borderColor='transparent'">
+            Volver a Admin
+        </a>
+    `;
+
+    // Add CSS pulse animation keyframes dynamically
+    if (!document.getElementById('admin-bypass-styles')) {
+        const styleSheet = document.createElement("style");
+        styleSheet.id = 'admin-bypass-styles';
+        styleSheet.innerText = `
+            @keyframes pulse {
+                0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7); }
+                70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 230, 118, 0); }
+                100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    }
+
+    document.body.appendChild(badge);
 }
 

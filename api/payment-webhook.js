@@ -42,6 +42,30 @@ export default async function handler(req, res) {
         return res.status(200).json({ message: 'Notification already processed (locked)' });
     }
 
+    // 1.5. Lock distribuido (Base de datos): Verificar si ya procesamos este pago
+    const supabaseUrl = process.env.SUPABASE_URL || 'https://uelocqsryuvhcwmjjbho.supabase.co';
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (supabaseKey) {
+        try {
+            const checkResponse = await fetch(`${supabaseUrl}/rest/v1/payment_records?payment_id=eq.${paymentId}`, {
+                method: 'GET',
+                headers: {
+                    'apikey': supabaseKey,
+                    'Authorization': `Bearer ${supabaseKey}`
+                }
+            });
+            if (checkResponse.ok) {
+                const existingRecords = await checkResponse.json();
+                if (existingRecords && existingRecords.length > 0) {
+                    console.log(`[Deduplicación DB] El pago ${paymentId} ya existe en Supabase. Omitiendo procesamiento duplicado.`);
+                    return res.status(200).json({ message: 'Notification already processed (found in DB)' });
+                }
+            }
+        } catch (dbCheckError) {
+            console.error('Error al verificar duplicados en Supabase:', dbCheckError);
+        }
+    }
+
     // Adquirir bloqueo temporal antes del fetch asíncrono
     processedPayments.add(paymentId);
     console.log(`[Deduplicación] Adquiriendo bloqueo para el pago ${paymentId}.`);
@@ -137,7 +161,7 @@ export default async function handler(req, res) {
             const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
             
             if (supabaseKey) {
-                await fetch(`${supabaseUrl}/rest/v1/payment_records`, {
+                const dbResponse = await fetch(`${supabaseUrl}/rest/v1/payment_records`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -155,6 +179,19 @@ export default async function handler(req, res) {
                         environment: environment
                     })
                 });
+
+                if (!dbResponse.ok) {
+                    const dbErrorText = await dbResponse.text();
+                    console.error('Error al guardar pago en Supabase:', dbErrorText);
+                    
+                    // Si el error es por clave única duplicada (PostgREST 409 o contiene código 23505),
+                    // abortamos para evitar duplicar el envío a n8n.
+                    if (dbResponse.status === 409 || dbErrorText.includes('23505') || dbErrorText.includes('duplicate key') || dbErrorText.includes('already exists')) {
+                        console.log(`[Deduplicación DB Concurrente] Conflicto al insertar pago ${paymentId} (ya guardado concurrentemente). Omitiendo webhook n8n.`);
+                        processedPayments.delete(paymentId);
+                        return res.status(200).json({ message: 'Notification already processed (concurrent DB insertion)' });
+                    }
+                }
             } else {
                 console.warn('Falta SUPABASE_SERVICE_ROLE_KEY en el entorno.');
             }
