@@ -1217,15 +1217,29 @@ function initDownloadModal() {
         const isAdminMode = localStorage.getItem('adminMode') === 'true';
         const isPurchase = activeProductPrice > 0 && !isAdminMode;
 
-        // Send lead info to n8n in the background (only for free products or admin bypass on form submit)
-        if (!isPurchase) {
+        const isAdminBypassPurchase = activeProductPrice > 0 && isAdminMode;
+
+        if (isAdminBypassPurchase) {
+            // Send mock purchase info to n8n purchases webhook
             sendToN8N({
                 name: name,
                 email: email,
                 productName: activeProductName,
                 downloadUrl: activeDownloadUrl,
                 filename: activeDownloadFilename,
-                source: isAdminMode ? 'admin_bypass_download' : 'download_modal'
+                paymentId: 'admin_bypass_' + Date.now(),
+                status: 'approved',
+                source: 'admin_bypass_purchase'
+            }, true);
+        } else if (!isPurchase) {
+            // Send lead info to n8n free downloads webhook
+            sendToN8N({
+                name: name,
+                email: email,
+                productName: activeProductName,
+                downloadUrl: activeDownloadUrl,
+                filename: activeDownloadFilename,
+                source: 'download_modal'
             }, false);
         }
 
