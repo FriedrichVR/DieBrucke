@@ -68,12 +68,17 @@ function optimizeIndex(file) {
     // 1. Lucide CDN Optimization
     content = optimizeLucide(content);
 
-    // 2. Preload LCP Hero Image
-    const heroPreload = '<link rel="preload" as="image" href="images/hero/hero1.jpg" fetchpriority="high">';
-    // Clean old preloads for hero1.jpg
-    content = content.replace(/<link rel="preload" as="image" href="images\/hero\/hero1\.jpg"[^>]*>\s*/g, '');
-    if (!content.includes(heroPreload)) {
-        content = content.replace('</head>', `    ${heroPreload}\n</head>`);
+    // 2. Preload LCP Hero Image dynamically
+    const heroCarouselMatch = content.match(/<div class="hero-carousel-slides">([\s\S]*?)<\/div>/);
+    if (heroCarouselMatch) {
+        const imgMatch = heroCarouselMatch[1].match(/src="([^"]+)"/);
+        if (imgMatch) {
+            const activeImgSrc = imgMatch[1];
+            // Clean any existing hero preloads
+            content = content.replace(/<link rel="preload" as="image" href="images\/hero\/hero\d\.(jpg|jpeg|webp)"[^>]*>\s*/g, '');
+            const preloadTag = `<link rel="preload" as="image" href="${activeImgSrc}" fetchpriority="high">`;
+            content = content.replace('</head>', `    ${preloadTag}\n</head>`);
+        }
     }
 
     // 3. Optimize Hero Visual Carousel (Above fold, LCP first, lazy others)
@@ -91,7 +96,7 @@ function optimizeIndex(file) {
     });
 
     // 6. Optimize Magdalena visual & about images (Below fold, lazy)
-    content = content.replace(/<img[^>]+src="images\/magdalena\.jpg"[^>]*>/g, (imgHtml) => {
+    content = content.replace(/<img[^>]+src="images\/magdalena\.webp"[^>]*>/g, (imgHtml) => {
         return optimizeImgTag(imgHtml, false);
     });
 
@@ -141,8 +146,8 @@ function optimizeHistoria(file) {
     content = optimizeCarousel(content, /<div class="story-carousel-slides">([\s\S]*?)<\/div>/, false);
 
     // 3. Preload LCP Story Image
-    const preloadTag = '<link rel="preload" as="image" href="images/magui/m1.jpg" fetchpriority="high">';
-    content = content.replace(/<link rel="preload" as="image" href="images\/magui\/m1\.jpg"[^>]*>\s*/g, '');
+    const preloadTag = '<link rel="preload" as="image" href="images/magui/m1.webp" fetchpriority="high">';
+    content = content.replace(/<link rel="preload" as="image" href="images\/magui\/m1\.(jpg|jpeg|webp)"[^>]*>\s*/g, '');
     if (!content.includes(preloadTag)) {
         content = content.replace('</head>', `    ${preloadTag}\n</head>`);
     }

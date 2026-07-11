@@ -10,14 +10,14 @@
     <meta property="og:url" content="https://diebrucke.studio/product-1.html">
     <meta property="og:title" content="Escarapelas Ilustradas - Recurso Digital | Die Brücke">
     <meta property="og:description" content="Descarga el recurso digital 'Escarapelas Ilustradas'. Pack digital orientado a diseño gráfico y presentaciones, con recursos listos para uso inmediato en piezas visuales y láminas.">
-    <meta property="og:image" content="https://diebrucke.studio/images/card1/01.jpeg">
+    <meta property="og:image" content="https://diebrucke.studio/images/card1/01.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://diebrucke.studio/product-1.html">
     <meta property="twitter:title" content="Escarapelas Ilustradas - Recurso Digital | Die Brücke">
     <meta property="twitter:description" content="Descarga el recurso digital 'Escarapelas Ilustradas'. Pack digital orientado a diseño gráfico y presentaciones, con recursos listos para uso inmediato en piezas visuales y láminas.">
-    <meta property="twitter:image" content="https://diebrucke.studio/images/card1/01.jpeg">
+    <meta property="twitter:image" content="https://diebrucke.studio/images/card1/01.webp">
 
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
@@ -25,7 +25,7 @@
       "@context": "https://schema.org/",
       "@type": "Product",
       "name": "Escarapelas Ilustradas",
-      "image": "https://diebrucke.studio/images/card1/01.jpeg",
+      "image": "https://diebrucke.studio/images/card1/01.webp",
       "description": "Pack digital orientado a diseño gráfico y presentaciones, con recursos listos para uso inmediato en piezas visuales y láminas.",
       "brand": {
         "@type": "Brand",
@@ -47,7 +47,9 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap"></noscript>
     <link rel="stylesheet" href="styles.css">
     <!-- Lucide Icons CDN -->
     <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
@@ -391,7 +393,7 @@
             }
         }
     </style>
-    <link rel="preload" as="image" href="images/card1/01.jpeg" fetchpriority="high">
+        <link rel="preload" as="image" href="images/card1/01.webp" fetchpriority="high">
 </head>
 <body class="light-mode">
     <!-- Navigation Header -->
@@ -505,10 +507,10 @@
             <article class="product-media">            
                 <div class="product-carousel">
                     <div class="product-carousel-slides">
-                        <img fetchpriority="high" decoding="async" src="images/card1/01.jpeg" alt="Producto 1 - Vista 1" class="active">
-                        <img loading="lazy" decoding="async" src="images/card1/02.jpeg" alt="Producto 1 - Vista 2">
-                        <img loading="lazy" decoding="async" src="images/card1/03.jpeg" alt="Producto 1 - Vista 3">
-                        <img loading="lazy" decoding="async" src="images/card1/04.jpeg" alt="Producto 1 - Vista 4">
+                        <img fetchpriority="high" decoding="async" src="images/card1/01.webp" alt="Producto 1 - Vista 1" class="active">
+                        <img loading="lazy" decoding="async" src="images/card1/02.webp" alt="Producto 1 - Vista 2">
+                        <img loading="lazy" decoding="async" src="images/card1/03.webp" alt="Producto 1 - Vista 3">
+                        <img loading="lazy" decoding="async" src="images/card1/04.webp" alt="Producto 1 - Vista 4">
                     </div>
                     <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
                         <i data-lucide="chevron-left"></i>
