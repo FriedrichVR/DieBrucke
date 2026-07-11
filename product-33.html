@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Producto 33 | Die Brucke</title>
+    <meta name="description" content="Especificaciones del recurso digital Proyecto 1 y opción de compra.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Lucide Icons CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <style>
+        .product-detail {
+            position: relative;
+            padding: 120px 0 80px;
+            overflow: hidden;
+        }
+
+        .product-detail::before,
+        .product-detail::after {
+            content: '';
+            position: absolute;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .product-detail::before {
+            width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(196, 164, 124, 0.25), transparent 68%);
+            top: 10px;
+            left: -140px;
+        }
+
+        .product-detail::after {
+            width: 520px;
+            height: 520px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(23, 42, 57, 0.14), transparent 70%);
+            bottom: -220px;
+            right: -180px;
+        }
+
+        .product-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 22px;
+        }
+
+        .product-breadcrumb a:hover {
+            color: var(--text);
+        }
+
+        .product-layout {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .product-media,
+        .product-info {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), var(--surface));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .product-media {
+            position: relative;
+            align-self: stretch;
+            height: 100%;
+            background: #f5f5f5;
+            /* Fondo gris claro según la referencia */
+        }
+
+        .media-badge {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            z-index: 2;
+            background: rgba(23, 42, 57, 0.85);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-full);
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            padding: 7px 12px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .product-media img {
+            width: 100%;
+            height: 100%;
+            max-height: 620px;
+            object-fit: contain;
+            /* Adaptar la imagen al contenedor sin recortar */
+        }
+
+        .product-info {
+            padding: 28px;
+            position: sticky;
+            top: 92px;
+        }
+
+        .product-tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--tertiary);
+            margin-bottom: 6px;
+        }
+
+        .product-topline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .availability {
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 5px 10px;
+            border-radius: var(--radius-full);
+            background: var(--surface-low);
+        }
+
+        .product-title {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .product-lead {
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            font-size: 1.02rem;
+        }
+
+        .price-row {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .product-price {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+
+        .price-note {
+            color: var(--tertiary);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .btn-instagram-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+            color: #ffffff !important;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.82rem;
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 12px rgba(253, 29, 29, 0.2);
+            margin-left: auto;
+            align-self: center;
+        }
+
+        .btn-instagram-inline:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(253, 29, 29, 0.35);
+            opacity: 0.95;
+        }
+
+        .btn-instagram-inline svg {
+            width: 14px;
+            height: 14px;
+            stroke-width: 2.5;
+        }
+
+        .quick-benefits {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .quick-benefits span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            background: var(--surface-low);
+            padding: 5px 10px;
+            border-radius: var(--radius-full);
+        }
+
+        .product-specs {
+            list-style: none;
+            display: grid;
+            gap: 10px;
+            margin: 20px 0 28px;
+        }
+
+        .product-specs li {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 16px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            color: var(--text-muted);
+        }
+
+        .spec-label {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .spec-value {
+            text-align: right;
+        }
+
+        .product-guarantees {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: -8px;
+        }
+
+        .guarantee-item {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface-low);
+            padding: 10px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        body.dark-mode .product-media,
+        body.dark-mode .product-info {
+            background: linear-gradient(180deg, rgba(31, 44, 55, 0.95), var(--surface));
+        }
+
+        body.dark-mode .guarantee-item,
+        body.dark-mode .quick-benefits span,
+        body.dark-mode .availability {
+            background: rgba(21, 30, 37, 0.7);
+        }
+
+        @media (max-width: 992px) {
+            .product-layout {
+                grid-template-columns: 1fr;
+                gap: 28px;
+            }
+
+            .product-media {
+                height: clamp(280px, 45vh, 420px);
+            }
+
+            .product-info {
+                position: static;
+                padding: 24px;
+            }
+
+            .product-guarantees {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .guarantee-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                text-align: left;
+                padding: 8px 12px;
+                font-size: 0.76rem;
+            }
+
+            .guarantee-item::before {
+                content: '✓';
+                color: var(--accent);
+                font-weight: bold;
+                flex-shrink: 0;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .product-detail {
+                padding: 86px 0 48px;
+            }
+
+            .product-breadcrumb {
+                font-size: 0.78rem;
+                gap: 6px;
+                margin-bottom: 12px;
+            }
+
+            .product-title {
+                font-size: 1.65rem;
+            }
+
+            .product-info {
+                padding: 20px;
+            }
+
+            .product-topline {
+                flex-wrap: wrap;
+            }
+
+            .price-row {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 14px;
+                gap: 8px;
+            }
+
+            .btn-instagram-inline {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
+
+            .media-badge {
+                top: 10px;
+                left: 10px;
+                font-size: 0.66rem;
+                padding: 6px 10px;
+            }
+
+            .product-specs {
+                margin: 16px 0 20px;
+                gap: 8px;
+            }
+
+            .product-specs li {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                gap: 12px;
+                font-size: 0.8rem;
+                padding-bottom: 8px;
+            }
+
+            .spec-value {
+                text-align: right;
+            }
+
+            .product-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .product-actions .btn-primary,
+            .product-actions .btn-secondary {
+                width: 100%;
+                min-height: 48px;
+            }
+        }
+    </style>
+    <link rel="preload" as="image" href="images/card16/1.jpg" fetchpriority="high">
+</head>
+
+<body class="light-mode">
+    <!-- Navigation Header -->
+    <header class="main-header">
+        <div class="nav-container">
+            <a href="index.html" class="logo" id="header-logo">
+                <span class="logo-text">DIE BRÜCKE</span>
+                <span class="logo-sub">Atelier</span>
+            </a>
+
+            <nav class="nav-links" id="nav-menu">
+                <a href="index.html#inicio">Inicio</a>
+                <a href="index.html#catalogo">Catálogo</a>
+                <a href="index.html#galeria">Estudio</a>
+                <a href="index.html#contact-form-section">Contacto</a>
+                <a href="index.html#magdalena">Sobre Mí</a>
+
+                <!-- Link al Instagram de Magui -->
+                <a href="https://www.instagram.com/reel/DYF0lQhBTTI/?igsh=MTljczVhd3huMmJheg==" target="_blank" rel="noopener noreferrer">Videos IG</a>
+            </nav>
+
+            <div class="nav-actions">
+                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Cambiar tema de color">
+                    <i data-lucide="moon" class="moon-icon"></i>
+                    <i data-lucide="sun" class="sun-icon" style="display: none;"></i>
+                </button>
+                <a href="index.html#catalogo" class="btn-primary nav-cta">Descargar</a>
+                <button class="menu-toggle" id="mobile-menu-btn" aria-label="Abrir menú de navegación"
+                    aria-controls="mobile-drawer" aria-expanded="false">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="mobile-drawer" id="mobile-drawer">
+        <div class="drawer-header">
+            <div class="logo">
+                <span class="logo-text">DIE BRÜCKE</span>
+                <span class="logo-sub">Atelier</span>
+            </div>
+            <button class="close-drawer" id="close-drawer-btn" aria-label="Cerrar menú">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <nav class="drawer-links">
+            <a href="index.html#inicio" onclick="toggleDrawer()">
+                <i data-lucide="home"></i>
+                <div class="link-text">
+                    <span class="link-title">Inicio</span>
+                    <span class="link-sub">Portada principal</span>
+                </div>
+            </a>
+            <a href="index.html#catalogo" onclick="toggleDrawer()">
+                <i data-lucide="book-open"></i>
+                <div class="link-text">
+                    <span class="link-title">Catálogo</span>
+                    <span class="link-sub">Recursos creativos</span>
+                </div>
+            </a>
+            <a href="index.html#galeria" onclick="toggleDrawer()">
+                <i data-lucide="pen-tool"></i>
+                <div class="link-text">
+                    <span class="link-title">Estudio</span>
+                    <span class="link-sub">Estética y procesos</span>
+                </div>
+            </a>
+            <a href="index.html#contact-form-section" onclick="toggleDrawer()">
+                <i data-lucide="mail"></i>
+                <div class="link-text">
+                    <span class="link-title">Contacto</span>
+                    <span class="link-sub">Consultas y encargos</span>
+                </div>
+            </a>
+            <a href="index.html#magdalena" onclick="toggleDrawer()">
+                <i data-lucide="user"></i>
+                <div class="link-text">
+                    <span class="link-title">Sobre Mí</span>
+                    <span class="link-sub">Filosofía e historia</span>
+                </div>
+            </a>
+            <a href="https://www.instagram.com/reel/DYF0lQhBTTI/?igsh=MTljczVhd3huMmJheg==" target="_blank" rel="noopener noreferrer">
+                <i data-lucide="instagram"></i>
+                <div class="link-text">
+                    <span class="link-title">Videos IG</span>
+                    <span class="link-sub">Inspiración en video</span>
+                </div>
+            </a>
+        </nav>
+        <div class="drawer-footer">
+            <button id="theme-toggle-mobile" class="theme-toggle-btn-mobile">
+                <i data-lucide="moon" class="moon-icon"></i> Oscuro
+            </button>
+            <a href="index.html#catalogo" class="btn-primary" onclick="toggleDrawer()">Explorar Assets</a>
+        </div>
+    </div>
+    <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop" aria-hidden="true"></div>                       
+
+    <main class="product-detail">
+        <div class="grid-container">
+            <nav class="product-breadcrumb" aria-label="Navegación de producto">
+                <a href="index.html">Inicio</a>
+                <span>/</span>
+                <a href="index.html#catalogo">Catálogo</a>
+                <span>/</span>
+                <span>Producto 33</span>
+            </nav>
+
+            <div class="product-layout">
+                <article class="product-media">
+                    <div class="product-carousel">
+                        <div class="product-carousel-slides">
+                            <img fetchpriority="high" decoding="async" src="images/card33/1.jpg" alt="Calles de Avellaneda - Vista 1" class="active">
+                            <img loading="lazy" decoding="async" src="images/card33/2.jpg" alt="Calles de Avellaneda   - Vista 2">
+                          
+                            
+
+                            
+                        </div>
+                        <button class="prod-carousel-btn prev" aria-label="Imagen anterior">
+                            <i data-lucide="chevron-left"></i>
+                        </button>
+                        <button class="prod-carousel-btn next" aria-label="Siguiente imagen">
+                            <i data-lucide="chevron-right"></i>
+                        </button>
+                        <div class="prod-carousel-dots">
+                            <span class="prod-dot active"></span>
+                            <span class="prod-dot"></span>
+                            
+                        </div>
+                    </div>
+                </article>
+
+                <article class="product-info">
+                    <div class="product-topline">
+                        <span class="product-tag">Libro Digital</span>
+                        <span class="availability">De oferta</span>
+                    </div>
+                    <h1 class="product-title">Calles de Avellaneda</h1>
+                    <p class="product-lead">Material descargable con actividades adaptadas para primer y segundo ciclo,
+                         ideal para trabajar el Día de la Declaración de la Independencia.</p>
+
+                    <div class="price-row">
+                        <p class="product-price">3.500 ARS</p>
+                        <span class="price-note">Tiempo Limitado</span>
+                        <a href="https://www.instagram.com/reel/DZYNAJihEFF/?igsh=dnRqcGdwcnh2YnEw" target="_blank" rel="noopener noreferrer" class="btn-instagram-inline" title="Ver Reel en Instagram">
+                            <i data-lucide="instagram"></i>
+                            <span>Ver Reel</span>
+                        </a>
+                    </div>
+
+                    <div class="quick-benefits">
+                        <span>Descarga inmediata</span>
+                        <span>Uso comercial</span>
+                        <span>Actualización incluida</span>
+                    </div>
+
+                    <ul class="product-specs">
+                        <li><span class="spec-label">Formato</span><span class="spec-value">PNG, JPG, PDF</span></li>
+                        <li><span class="spec-label">Resolución</span><span class="spec-value">Hasta 4K</span></li>
+                        <li><span class="spec-label">Entrega</span><span class="spec-value">Descarga digital
+                                inmediata</span></li>
+                        <li><span class="spec-label">Licencia</span><span class="spec-value">Uso comercial
+                                incluido</span></li>
+                        <li><span class="spec-label">Compatibilidad</span><span class="spec-value">Adobe, Figma, Canva y
+                                similares</span></li>
+                    </ul>
+
+                    <div class="product-guarantees" aria-label="Beneficios adicionales">
+                        <div class="guarantee-item">fixture para completar partidos de Argentina </div>
+                        <div class="guarantee-item">trivia mundialista,sopa de letras y hojaldre de datos curiosos</div>
+                        <div class="guarantee-item">stickers y espacios interactivos</div>
+                    </div>
+
+                    <div class="product-actions">
+                        <a class="btn-primary" href="pdf/Calles de Avellaneda.pdf" download="Calles de Avellaneda.pdf" data-product-name="Calles de Avellaneda" data-product-price="3500">Descargar</a>
+                        <a class="btn-secondary" href="index.html#catalogo">Volver al Catálogo</a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </main>
+    <!-- JS Scripts -->
+    <script src="script.js"></script>
+</body>
+
+</html>
