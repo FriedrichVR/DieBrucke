@@ -1568,7 +1568,7 @@ body.dark-mode .mobile-drawer {
     margin-top: 4px;
 }
 
-.meta-item h4 {
+.meta-item h3 {
     font-size: 1.1rem;
     margin-bottom: 4px;
     color: var(--text);
@@ -1720,7 +1720,7 @@ body.dark-mode .mobile-drawer {
     gap: 14px;
 }
 
-.footer-links h4 {
+.footer-links h3 {
     font-size: 1.1rem;
     color: var(--text);
     margin-bottom: 8px;
