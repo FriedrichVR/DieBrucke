@@ -44,9 +44,13 @@ export default async function handler(req, res) {
 
     // 1.5. Lock distribuido (Base de datos): Verificar si ya procesamos este pago
     const supabaseUrl = process.env.SUPABASE_URL || 'https://uelocqsryuvhcwmjjbho.supabase.co';
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    // Usar la clave de servicio por defecto. Si no está en el entorno, usar la clave anon como fallback.
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG9jcXNyeXV2aGN3bWpqYmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzQ5MjMsImV4cCI6MjA5NzkxMDkyM30.uinZ-RlDIuQ7ZQlknhCmLef7Rzcb1DCWuxvwywkEFuw';
+    
     if (supabaseKey) {
         try {
+            // Nota: Si es la clave anon (debido a RLS), esta consulta GET siempre devolverá una lista vacía [].
+            // Por lo tanto, confiamos principalmente en el error 409 al insertar como la deduplicación definitiva.
             const checkResponse = await fetch(`${supabaseUrl}/rest/v1/payment_records?payment_id=eq.${paymentId}`, {
                 method: 'GET',
                 headers: {
@@ -157,10 +161,13 @@ export default async function handler(req, res) {
         // Insert into Supabase
         try {
             const supabaseUrl = process.env.SUPABASE_URL || 'https://uelocqsryuvhcwmjjbho.supabase.co';
-            // Use the service role key from .env to bypass RLS for inserting
-            const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+            // Usar la clave de servicio por defecto. Si no está en el entorno, usar la clave anon como fallback.
+            const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG9jcXNyeXV2aGN3bWpqYmhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzQ5MjMsImV4cCI6MjA5NzkxMDkyM30.uinZ-RlDIuQ7ZQlknhCmLef7Rzcb1DCWuxvwywkEFuw';
             
             if (supabaseKey) {
+                if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+                    console.log(`[Deduplicación] SUPABASE_SERVICE_ROLE_KEY no está definida en el entorno. Usando la clave anon de fallback.`);
+                }
                 const dbResponse = await fetch(`${supabaseUrl}/rest/v1/payment_records`, {
                     method: 'POST',
                     headers: {
@@ -192,12 +199,10 @@ export default async function handler(req, res) {
                         return res.status(200).json({ message: 'Notification already processed (concurrent DB insertion)' });
                     }
                 }
-            } else {
-                console.warn('Falta SUPABASE_SERVICE_ROLE_KEY en el entorno.');
             }
         } catch (dbError) {
             console.error('Error al guardar pago en Supabase:', dbError);
-            // We continue even if DB save fails to not block n8n
+            // Continuamos para no bloquear a n8n en fallos de red fortuitos
         }
 
         try {
@@ -224,13 +229,54 @@ export default async function handler(req, res) {
             if (!n8nResponse.ok) {
                 const n8nError = await n8nResponse.text();
                 console.error('Error al enviar webhook a n8n:', n8nError);
-                // Si falla, removemos de la caché para permitir reintentos
+                
+                // Rollback: Intentamos eliminar el registro de Supabase para que Mercado Pago pueda reintentar la entrega
+                try {
+                    console.log(`[Rollback] Eliminando registro de pago ${paymentId} de Supabase por fallo en n8n...`);
+                    const delRes = await fetch(`${supabaseUrl}/rest/v1/payment_records?payment_id=eq.${paymentId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'apikey': supabaseKey,
+                            'Authorization': `Bearer ${supabaseKey}`
+                        }
+                    });
+                    if (!delRes.ok) {
+                        const delError = await delRes.text();
+                        console.error('[Rollback] Fallo al eliminar registro de Supabase:', delError);
+                    } else {
+                        console.log('[Rollback] Registro eliminado con éxito de Supabase.');
+                    }
+                } catch (dbDeleteError) {
+                    console.error('Error al realizar rollback en Supabase:', dbDeleteError);
+                }
+
                 processedPayments.delete(paymentId);
                 clearTimeout(cleanupTimeout);
                 return res.status(500).json({ message: 'Error sending webhook to n8n' });
             }
         } catch (n8nFetchError) {
             console.error('Excepción al enviar webhook a n8n:', n8nFetchError);
+            
+            // Rollback: Intentamos eliminar el registro de Supabase
+            try {
+                console.log(`[Rollback] Eliminando registro de pago ${paymentId} de Supabase por excepción en n8n...`);
+                const delRes = await fetch(`${supabaseUrl}/rest/v1/payment_records?payment_id=eq.${paymentId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`
+                    }
+                });
+                if (!delRes.ok) {
+                    const delError = await delRes.text();
+                    console.error('[Rollback] Fallo al eliminar registro de Supabase:', delError);
+                } else {
+                    console.log('[Rollback] Registro eliminado con éxito de Supabase.');
+                }
+            } catch (dbDeleteError) {
+                console.error('Error al realizar rollback en Supabase:', dbDeleteError);
+            }
+
             processedPayments.delete(paymentId);
             clearTimeout(cleanupTimeout);
             return res.status(500).json({ message: 'Error sending webhook to n8n' });
