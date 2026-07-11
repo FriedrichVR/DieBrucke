@@ -1135,8 +1135,11 @@ function initDownloadModal() {
         lucide.createIcons();
 
         modal.style.display = 'flex';
-        modal.offsetHeight; // Reflow
-        modal.classList.add('open');
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                modal.classList.add('open');
+            });
+        });
         document.body.style.overflow = 'hidden';
     }
 
@@ -1437,8 +1440,11 @@ function initDownloadModal() {
 
                 // Open the modal overlay visually
                 modal.style.display = 'flex';
-                modal.offsetHeight; // Reflow
-                modal.classList.add('open');
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        modal.classList.add('open');
+                    });
+                });
                 document.body.style.overflow = 'hidden';
                 
                 // Clean up query params from URL so reloading doesn't trigger download again
@@ -1678,8 +1684,11 @@ function initCoffeeButton() {
 
     function openModal() {
         modal.style.display = 'flex';
-        modal.offsetHeight; // Reflow
-        modal.classList.add('open');
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                modal.classList.add('open');
+            });
+        });
         document.body.style.overflow = 'hidden';
     }
 
