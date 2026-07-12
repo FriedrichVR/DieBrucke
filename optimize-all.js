@@ -1,7 +1,20 @@
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const dir = __dirname;
+
+// Helper to minify JS files using Terser
+function minifyJS() {
+    console.log('Minifying JS files...');
+    try {
+        execSync('npx terser script.js --compress --mangle --output script.min.js', { stdio: 'inherit' });
+        execSync('npx terser admin.js --compress --mangle --output admin.min.js', { stdio: 'inherit' });
+        console.log('JS files minified successfully!\n');
+    } catch (err) {
+        console.error('Error minifying JS files:', err.message);
+    }
+}
 
 // Helper to optimize Lucide script
 function optimizeLucide(content) {
@@ -9,6 +22,31 @@ function optimizeLucide(content) {
     const lucideRegex = /<script\s+(?:defer\s+)?src="https:\/\/unpkg\.com\/lucide@?[^"]*"><\/script>/g;
     const optimizedTag = '<script defer src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>';
     return content.replace(lucideRegex, optimizedTag);
+}
+
+// Helper to optimize scripts and fonts (remove preload, remove synchronous script, inject deferred minified script in head)
+function optimizeScriptsAndFonts(content, isWeb = true) {
+    // 1. Remove Google Fonts preload
+    content = content.replace(/<link rel="preload" as="style" href="https:\/\/fonts\.googleapis\.com\/css2\?[^>]*>\s*/g, '');
+
+    // 2. Remove script.js or script.min.js references
+    content = content.replace(/<script\s*(?:defer\s*)?src="script(?:\.min)?\.js"><\/script>\s*/g, '');
+
+    // 3. Remove admin.js or admin.min.js references
+    content = content.replace(/<script\s*(?:defer\s*)?src="admin(?:\.min)?\.js"><\/script>\s*/g, '');
+
+    // 4. Add deferred script to head if not present
+    if (isWeb) {
+        if (!content.includes('script.min.js')) {
+            content = content.replace('</head>', '    <script defer src="script.min.js"></script>\n</head>');
+        }
+    } else {
+        if (!content.includes('admin.min.js')) {
+            content = content.replace('</head>', '    <script defer src="admin.min.js"></script>\n</head>');
+        }
+    }
+
+    return content;
 }
 
 // Helper to optimize image tags
@@ -85,9 +123,8 @@ function optimizeIndex(file) {
     content = optimizeCarousel(content, /<div class="hero-carousel-slides">([\s\S]*?)<\/div>/, false);
 
     // 4. Optimize Catalog Card Carousels (Below fold, all lazy)
-    // Directly target catalog card images using global regex to avoid nested div parsing issues
     content = content.replace(/<img[^>]+src="images\/(card[0-9]+|Bitacora)\/[^"]+"[^>]*>/g, (imgHtml) => {
-        return optimizeImgTag(imgHtml, false); // catalog card images are below the fold
+        return optimizeImgTag(imgHtml, false);
     });
 
     // 5. Optimize Showcase Carousel (Below fold, all lazy)
@@ -99,6 +136,9 @@ function optimizeIndex(file) {
     content = content.replace(/<img[^>]+src="images\/magdalena\.webp"[^>]*>/g, (imgHtml) => {
         return optimizeImgTag(imgHtml, false);
     });
+
+    // 7. Scripts and Fonts Optimization
+    content = optimizeScriptsAndFonts(content, true);
 
     fs.writeFileSync(filePath, content, 'utf8');
     console.log(`Optimized index: ${file}`);
@@ -129,6 +169,9 @@ function optimizeProduct(file) {
             content = content.replace('</head>', `    ${preloadTag}\n</head>`);
         }
     }
+
+    // 4. Scripts and Fonts Optimization
+    content = optimizeScriptsAndFonts(content, true);
 
     fs.writeFileSync(filePath, content, 'utf8');
     console.log(`Optimized product page: ${file}`);
@@ -165,11 +208,31 @@ function optimizeHistoria(file) {
         return `<div class="story-gallery">${newInner}</div>`;
     });
 
+    // 5. Scripts and Fonts Optimization
+    content = optimizeScriptsAndFonts(content, true);
+
     fs.writeFileSync(filePath, content, 'utf8');
     console.log(`Optimized historia page: ${file}`);
 }
 
+// Process admin.html
+function optimizeAdmin(file) {
+    const filePath = path.join(dir, file);
+    let content = fs.readFileSync(filePath, 'utf8');
+
+    // 1. Lucide CDN Optimization
+    content = optimizeLucide(content);
+
+    // 2. Scripts and Fonts Optimization
+    content = optimizeScriptsAndFonts(content, false);
+
+    fs.writeFileSync(filePath, content, 'utf8');
+    console.log(`Optimized admin: ${file}`);
+}
+
 // Main execution
+minifyJS();
+
 const files = fs.readdirSync(dir).filter(f => f.endsWith('.html'));
 
 files.forEach(file => {
@@ -179,6 +242,8 @@ files.forEach(file => {
         optimizeHistoria(file);
     } else if (file.startsWith('product-')) {
         optimizeProduct(file);
+    } else if (file === 'admin.html') {
+        optimizeAdmin(file);
     }
 });
 
