@@ -16,15 +16,75 @@ function minifyJS() {
     }
 }
 
+// Dependency-free CSS minifier
+function minifyCSS(css) {
+    return css
+        .replace(/\/\*[\s\S]*?\*\//g, '') // remove comments
+        .replace(/\s*([{}|:;,])\s*/g, '$1') // remove spaces around braces and colons
+        .replace(/\s+/g, ' ') // collapse multiple spaces
+        .trim();
+}
+
+// Helper to minify CSS files
+function processCSS() {
+    console.log('Minifying CSS stylesheet...');
+    try {
+        const cssPath = path.join(dir, 'styles.src.css');
+        if (fs.existsSync(cssPath)) {
+            const rawCss = fs.readFileSync(cssPath, 'utf8');
+            const minifiedCss = minifyCSS(rawCss);
+            fs.writeFileSync(path.join(dir, 'styles.css'), minifiedCss, 'utf8');
+            console.log('CSS stylesheet minified successfully!\n');
+        }
+    } catch (err) {
+        console.error('Error minifying CSS:', err.message);
+    }
+}
+
+// Helper to get WebP dimensions dynamically from file
+function getWebpDimensions(src) {
+    // Clean up query parameters or leading slashes
+    const cleanSrc = src.split('?')[0].replace(/^\//, '');
+    const filePath = path.join(dir, cleanSrc);
+
+    if (!fs.existsSync(filePath)) {
+        return null;
+    }
+
+    try {
+        const buffer = fs.readFileSync(filePath);
+        if (buffer.toString('ascii', 0, 4) !== 'RIFF' || buffer.toString('ascii', 8, 12) !== 'WEBP') {
+            return null;
+        }
+        const chunkType = buffer.toString('ascii', 12, 16);
+        if (chunkType === 'VP8 ') {
+            const width = buffer.readUInt16LE(26) & 0x3FFF;
+            const height = buffer.readUInt16LE(28) & 0x3FFF;
+            return { width, height };
+        } else if (chunkType === 'VP8L') {
+            const val = buffer.readUInt32LE(21);
+            const width = (val & 0x3FFF) + 1;
+            const height = ((val >> 14) & 0x3FFF) + 1;
+            return { width, height };
+        } else if (chunkType === 'VP8X') {
+            const width = (buffer.readUInt32LE(24) & 0xFFFFFF) + 1;
+            const height = (buffer.readUInt32LE(27) & 0xFFFFFF) + 1;
+            return { width, height };
+        }
+    } catch (err) {
+        // Fail silently
+    }
+    return null;
+}
+
 // Helper to optimize Lucide script
 function optimizeLucide(content) {
-    // Matches any unpkg.com/lucide@... script tag, with or without defer/async
     const lucideRegex = /<script\s+(?:defer\s+)?src="https:\/\/unpkg\.com\/lucide@?[^"]*"><\/script>/g;
     const optimizedTag = '<script defer src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>';
     return content.replace(lucideRegex, optimizedTag);
 }
 
-// Helper to optimize scripts and fonts (remove preload, remove synchronous script, inject deferred minified script in head)
+// Helper to optimize scripts and fonts
 function optimizeScriptsAndFonts(content, isWeb = true) {
     // 1. Remove Google Fonts preload
     content = content.replace(/<link rel="preload" as="style" href="https:\/\/fonts\.googleapis\.com\/css2\?[^>]*>\s*/g, '');
@@ -49,26 +109,37 @@ function optimizeScriptsAndFonts(content, isWeb = true) {
     return content;
 }
 
-// Helper to optimize image tags
+// Helper to optimize image tags and insert dimensions
 function optimizeImgTag(imgHtml, isLcp) {
-    // Remove existing loading="lazy", fetchpriority, decoding attributes to start clean
+    // Remove existing attributes to start clean
     let clean = imgHtml
         .replace(/\s+loading="[^"]*"/g, '')
         .replace(/\s+fetchpriority="[^"]*"/g, '')
         .replace(/\s+decoding="[^"]*"/g, '')
-        // Clean up double spaces that might occur
+        .replace(/\s+width="[^"]*"/g, '')
+        .replace(/\s+height="[^"]*"/g, '')
         .replace(/\s+/g, ' ');
 
-    // Reconstruct with optimal attributes
-    if (isLcp) {
-        // LCP images load eagerly, with high priority and async decoding
-        clean = clean.replace('<img', '<img fetchpriority="high" decoding="async"');
-    } else {
-        // Non-LCP images load lazily and async
-        clean = clean.replace('<img', '<img loading="lazy" decoding="async"');
+    // Extract src to find dimensions
+    const srcMatch = clean.match(/src="([^"]+)"/);
+    let dims = null;
+    if (srcMatch) {
+        dims = getWebpDimensions(srcMatch[1]);
     }
-    
-    // Ensure formatting is clean
+
+    // Reconstruct with optimal attributes
+    let attrs = '';
+    if (isLcp) {
+        attrs += ' fetchpriority="high" decoding="async"';
+    } else {
+        attrs += ' loading="lazy" decoding="async"';
+    }
+
+    if (dims) {
+        attrs += ` width="${dims.width}" height="${dims.height}"`;
+    }
+
+    clean = clean.replace('<img', `<img${attrs}`);
     clean = clean.replace(/\s*\/?>$/, '>');
     return clean;
 }
@@ -87,8 +158,6 @@ function optimizeCarousel(content, carouselSelectorRegex, isBelowFold) {
 
     let newInnerContent = innerContent;
     imgs.forEach((imgHtml, idx) => {
-        // If the entire carousel is below the fold, then even the first image is lazy
-        // Otherwise, the first image (idx === 0) is LCP (eager), others are lazy
         const isLcp = !isBelowFold && idx === 0;
         const optimizedImg = optimizeImgTag(imgHtml, isLcp);
         newInnerContent = newInnerContent.replace(imgHtml, optimizedImg);
@@ -232,6 +301,7 @@ function optimizeAdmin(file) {
 
 // Main execution
 minifyJS();
+processCSS();
 
 const files = fs.readdirSync(dir).filter(f => f.endsWith('.html'));
 
@@ -247,4 +317,4 @@ files.forEach(file => {
     }
 });
 
-console.log('\nAll HTML files optimized successfully!');
+console.log('\nAll HTML/CSS/JS files optimized successfully!');
