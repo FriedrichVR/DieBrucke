@@ -43,7 +43,6 @@ function processCSS() {
 
 // Helper to get WebP dimensions dynamically from file
 function getWebpDimensions(src) {
-    // Clean up query parameters or leading slashes
     const cleanSrc = src.split('?')[0].replace(/^\//, '');
     const filePath = path.join(dir, cleanSrc);
 
@@ -109,9 +108,143 @@ function optimizeScriptsAndFonts(content, isWeb = true) {
     return content;
 }
 
+// Helper for SEO injection (Canonical, Robots, Open Graph, Schema.org)
+function optimizeSEOAndHead(file, content) {
+    const domain = 'https://diebrucke.studio';
+    let canonicalUrl = domain;
+    if (file === 'index.html') {
+        canonicalUrl = `${domain}/`;
+    } else if (file === 'historia.html') {
+        canonicalUrl = `${domain}/historia`;
+    } else if (file.startsWith('product-')) {
+        const slug = file.replace('.html', '');
+        canonicalUrl = `${domain}/${slug}`;
+    }
+
+    // Robots Meta Tag
+    const robotsTag = file === 'admin.html' 
+        ? '<meta name="robots" content="noindex, nofollow">'
+        : '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">';
+
+    // Clean existing canonical & robots tags to prevent duplication
+    content = content.replace(/<link rel="canonical"[^>]*>\s*/g, '');
+    content = content.replace(/<meta name="robots"[^>]*>\s*/g, '');
+
+    let headInsertions = `    <link rel="canonical" href="${canonicalUrl}">\n    ${robotsTag}\n`;
+
+    if (file !== 'admin.html') {
+        if (!content.includes('property="og:site_name"')) {
+            headInsertions += '    <meta property="og:site_name" content="Die Brücke Atelier">\n';
+        }
+        if (!content.includes('property="og:locale"')) {
+            headInsertions += '    <meta property="og:locale" content="es_AR">\n';
+        }
+    }
+
+    if (file.startsWith('product-')) {
+        const slug = file.replace('.html', '');
+        const productUrl = `${domain}/${slug}`;
+        content = content.replace(/meta property="og:url" content="[^"]*"/g, `meta property="og:url" content="${productUrl}"`);
+        content = content.replace(/meta property="twitter:url" content="[^"]*"/g, `meta property="twitter:url" content="${productUrl}"`);
+        
+        // Clean URL in Product schema offer
+        content = content.replace(/"url":\s*"https:\/\/diebrucke\.studio\/product-\d+(\.html)?"/g, `"url": "${productUrl}"`);
+
+        // Extract title for BreadcrumbList
+        const titleMatch = content.match(/<title>(.*?)<\/title>/i);
+        const productName = titleMatch ? titleMatch[1].replace(' - Recurso Digital | Die Brücke', '').trim() : slug;
+
+        if (!content.includes('BreadcrumbList')) {
+            const breadcrumbSchema = `
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Inicio",
+          "item": "${domain}/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Catálogo",
+          "item": "${domain}/#catalogo"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "${productName}",
+          "item": "${productUrl}"
+        }
+      ]
+    }
+    </script>`;
+            headInsertions += breadcrumbSchema + '\n';
+        }
+    } else if (file === 'historia.html') {
+        if (!content.includes('og:type')) {
+            headInsertions += `
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="${domain}/historia">
+    <meta property="og:title" content="Historia de Magdalena | Die Brücke Atelier">
+    <meta property="og:description" content="Conocé la historia de Magdalena, creadora de Die Brücke: su camino, procesos y filosofía de diseño.">
+    <meta property="og:image" content="${domain}/images/magdalena.webp">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Historia de Magdalena | Die Brücke Atelier">
+    <meta property="twitter:description" content="Conocé la historia de Magdalena, creadora de Die Brücke: su camino, procesos y filosofía de diseño.">
+    <meta property="twitter:image" content="${domain}/images/magdalena.webp">\n`;
+        }
+
+        if (!content.includes('application/ld+json')) {
+            headInsertions += `
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "AboutPage",
+      "name": "Historia de Magdalena | Die Brücke Atelier",
+      "url": "${domain}/historia",
+      "description": "Conocé la historia de Magdalena, creadora de Die Brücke: su camino, procesos y filosofía de diseño.",
+      "mainEntity": {
+        "@type": "Person",
+        "name": "Magdalena",
+        "jobTitle": "Creadora & Diseñadora",
+        "worksFor": {
+          "@type": "Organization",
+          "name": "Die Brücke Atelier"
+        }
+      }
+    }
+    </script>\n`;
+        }
+    } else if (file === 'index.html') {
+        if (!content.includes('SearchAction')) {
+            const webSiteSchema = `
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Die Brücke Atelier",
+      "url": "${domain}/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "${domain}/#catalogo?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>\n`;
+            headInsertions += webSiteSchema + '\n';
+        }
+    }
+
+    content = content.replace('</head>', `${headInsertions}</head>`);
+    return content;
+}
+
 // Helper to optimize image tags and insert dimensions
 function optimizeImgTag(imgHtml, isLcp) {
-    // Remove existing attributes to start clean
     let clean = imgHtml
         .replace(/\s+loading="[^"]*"/g, '')
         .replace(/\s+fetchpriority="[^"]*"/g, '')
@@ -120,14 +253,12 @@ function optimizeImgTag(imgHtml, isLcp) {
         .replace(/\s+height="[^"]*"/g, '')
         .replace(/\s+/g, ' ');
 
-    // Extract src to find dimensions
     const srcMatch = clean.match(/src="([^"]+)"/);
     let dims = null;
     if (srcMatch) {
         dims = getWebpDimensions(srcMatch[1]);
     }
 
-    // Reconstruct with optimal attributes
     let attrs = '';
     if (isLcp) {
         attrs += ' fetchpriority="high" decoding="async"';
@@ -172,41 +303,34 @@ function optimizeIndex(file) {
     const filePath = path.join(dir, file);
     let content = fs.readFileSync(filePath, 'utf8');
 
-    // 1. Lucide CDN Optimization
     content = optimizeLucide(content);
 
-    // 2. Preload LCP Hero Image dynamically
     const heroCarouselMatch = content.match(/<div class="hero-carousel-slides">([\s\S]*?)<\/div>/);
     if (heroCarouselMatch) {
         const imgMatch = heroCarouselMatch[1].match(/src="([^"]+)"/);
         if (imgMatch) {
             const activeImgSrc = imgMatch[1];
-            // Clean any existing hero preloads
             content = content.replace(/<link rel="preload" as="image" href="images\/hero\/hero\d\.(jpg|jpeg|webp)"[^>]*>\s*/g, '');
             const preloadTag = `<link rel="preload" as="image" href="${activeImgSrc}" fetchpriority="high">`;
             content = content.replace('</head>', `    ${preloadTag}\n</head>`);
         }
     }
 
-    // 3. Optimize Hero Visual Carousel (Above fold, LCP first, lazy others)
     content = optimizeCarousel(content, /<div class="hero-carousel-slides">([\s\S]*?)<\/div>/, false);
 
-    // 4. Optimize Catalog Card Carousels (Below fold, all lazy)
     content = content.replace(/<img[^>]+src="images\/(card[0-9]+|Bitacora)\/[^"]+"[^>]*>/g, (imgHtml) => {
         return optimizeImgTag(imgHtml, false);
     });
 
-    // 5. Optimize Showcase Carousel (Below fold, all lazy)
     content = content.replace(/<img[^>]+src="images\/flyers\/[^"]+"[^>]*>/g, (imgHtml) => {
         return optimizeImgTag(imgHtml, false);
     });
 
-    // 6. Optimize Magdalena visual & about images (Below fold, lazy)
     content = content.replace(/<img[^>]+src="images\/magdalena\.webp"[^>]*>/g, (imgHtml) => {
         return optimizeImgTag(imgHtml, false);
     });
 
-    // 7. Scripts and Fonts Optimization
+    content = optimizeSEOAndHead(file, content);
     content = optimizeScriptsAndFonts(content, true);
 
     fs.writeFileSync(filePath, content, 'utf8');
@@ -218,28 +342,23 @@ function optimizeProduct(file) {
     const filePath = path.join(dir, file);
     let content = fs.readFileSync(filePath, 'utf8');
 
-    // 1. Lucide CDN Optimization
     content = optimizeLucide(content);
 
-    // 2. Optimize Product Carousel (Above fold, LCP first, lazy others)
     content = optimizeCarousel(content, /<div class="product-carousel-slides">([\s\S]*?)<\/div>/, false);
 
-    // 3. Preload LCP Product Image
     const carouselMatch = content.match(/<div class="product-carousel-slides">([\s\S]*?)<\/div>/);
     if (carouselMatch) {
         const imgMatch = carouselMatch[1].match(/src="([^"]+)"/);
         if (imgMatch) {
             const activeImgSrc = imgMatch[1];
-            // Clean any existing preloads of this image
             const cleanRegex = new RegExp(`<link rel="preload" as="image" href="${activeImgSrc.replace(/\//g, '\\/')}"[^>]*>\\s*`, 'g');
             content = content.replace(cleanRegex, '');
-            // Add preload link
             const preloadTag = `<link rel="preload" as="image" href="${activeImgSrc}" fetchpriority="high">`;
             content = content.replace('</head>', `    ${preloadTag}\n</head>`);
         }
     }
 
-    // 4. Scripts and Fonts Optimization
+    content = optimizeSEOAndHead(file, content);
     content = optimizeScriptsAndFonts(content, true);
 
     fs.writeFileSync(filePath, content, 'utf8');
@@ -251,20 +370,16 @@ function optimizeHistoria(file) {
     const filePath = path.join(dir, file);
     let content = fs.readFileSync(filePath, 'utf8');
 
-    // 1. Lucide CDN Optimization
     content = optimizeLucide(content);
 
-    // 2. Optimize Story Carousel (Above fold, LCP first, lazy others)
     content = optimizeCarousel(content, /<div class="story-carousel-slides">([\s\S]*?)<\/div>/, false);
 
-    // 3. Preload LCP Story Image
     const preloadTag = '<link rel="preload" as="image" href="images/magui/m1.webp" fetchpriority="high">';
     content = content.replace(/<link rel="preload" as="image" href="images\/magui\/m1\.(jpg|jpeg|webp)"[^>]*>\s*/g, '');
     if (!content.includes(preloadTag)) {
         content = content.replace('</head>', `    ${preloadTag}\n</head>`);
     }
 
-    // 4. Optimize Gallery images (Below fold, lazy)
     content = content.replace(/<div class="story-gallery">([\s\S]*?)<\/div>/g, (match, inner) => {
         const imgRegex = /<img[^>]+>/g;
         const imgs = inner.match(imgRegex);
@@ -277,7 +392,7 @@ function optimizeHistoria(file) {
         return `<div class="story-gallery">${newInner}</div>`;
     });
 
-    // 5. Scripts and Fonts Optimization
+    content = optimizeSEOAndHead(file, content);
     content = optimizeScriptsAndFonts(content, true);
 
     fs.writeFileSync(filePath, content, 'utf8');
@@ -289,14 +404,50 @@ function optimizeAdmin(file) {
     const filePath = path.join(dir, file);
     let content = fs.readFileSync(filePath, 'utf8');
 
-    // 1. Lucide CDN Optimization
     content = optimizeLucide(content);
-
-    // 2. Scripts and Fonts Optimization
+    content = optimizeSEOAndHead(file, content);
     content = optimizeScriptsAndFonts(content, false);
 
     fs.writeFileSync(filePath, content, 'utf8');
     console.log(`Optimized admin: ${file}`);
+}
+
+// Helper to generate sitemap.xml dynamically
+function generateSitemap() {
+    console.log('Generating updated sitemap.xml...');
+    const domain = 'https://diebrucke.studio';
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    const entries = [
+        { url: `${domain}/`, priority: '1.0', changefreq: 'daily' },
+        { url: `${domain}/historia`, priority: '0.9', changefreq: 'weekly' }
+    ];
+
+    const productFiles = fs.readdirSync(dir)
+        .filter(f => f.startsWith('product-') && f.endsWith('.html'))
+        .sort((a, b) => {
+            const numA = parseInt(a.replace('product-', '').replace('.html', ''), 10);
+            const numB = parseInt(b.replace('product-', '').replace('.html', ''), 10);
+            return numA - numB;
+        });
+
+    productFiles.forEach(file => {
+        const slug = file.replace('.html', '');
+        entries.push({
+            url: `${domain}/${slug}`,
+            priority: '0.8',
+            changefreq: 'weekly'
+        });
+    });
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+    entries.forEach(e => {
+        xml += `    <url>\n        <loc>${e.url}</loc>\n        <lastmod>${currentDate}</lastmod>\n        <changefreq>${e.changefreq}</changefreq>\n        <priority>${e.priority}</priority>\n    </url>\n`;
+    });
+    xml += `</urlset>\n`;
+
+    fs.writeFileSync(path.join(dir, 'sitemap.xml'), xml, 'utf8');
+    console.log(`sitemap.xml generated with ${entries.length} URLs successfully!\n`);
 }
 
 // Main execution
@@ -317,4 +468,6 @@ files.forEach(file => {
     }
 });
 
-console.log('\nAll HTML/CSS/JS files optimized successfully!');
+generateSitemap();
+
+console.log('\nAll HTML/CSS/JS files and SEO assets optimized successfully!');
